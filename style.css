@@ -1,0 +1,24 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+}
+
+.container {
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 10px;
+    width: 300px;
+}
+
+input[type="text"] {
+    width: 30px;
+    text-align: center;
+}
+
+canvas {
+    border: 1px solid #000;
+    background: #fff;
+}
