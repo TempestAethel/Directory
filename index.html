@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .letter-box {
+            display: inline-block;
+            margin: 5px;
+            font-size: 24px;
+            border-bottom: 2px solid black;
+            width: 30px;
+        }
+        .guessed-letters {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Hangman Game</h1>
+    <p id="message">Guess the word:</p>
+    <div id="word-container"></div>
+    <p id="attempts"></p>
+    <div class="guessed-letters">
+        <p>Guessed letters: <span id="guessed-letters"></span></p>
+    </div>
+    <input type="text" id="letter-input" maxlength="1">
+    <button onclick="guessLetter()">Guess</button>
+
+    <script>
+        let word = '';
+        let guessedWord = [];
+        let attempts = 6;
+        let guessedLetters = [];
+
+        // Fetch the word from the server
+        function fetchWord() {
+            fetch('/get_word')
+                .then(response => response.json())
+                .then(data => {
+                    word = data.word;
+                    guessedWord = Array(word.length).fill('_');
+                    displayWord();
+                    document.getElementById('attempts').textContent = `You have ${attempts} incorrect guesses remaining.`;
+                });
+        }
+
+        // Display the current state of the word
+        function displayWord() {
+            const wordContainer = document.getElementById('word-container');
+            wordContainer.innerHTML = '';
+            guessedWord.forEach(letter => {
+                const span = document.createElement('span');
+                span.classList.add('letter-box');
+                span.textContent = letter;
+                wordContainer.appendChild(span);
+            });
+        }
+
+        // Handle the guess
+        function guessLetter() {
+            const input = document.getElementById('letter-input');
+            const guess = input.value.toLowerCase();
+
+            if (guess.length !== 1 || !/[a-z]/.test(guess)) {
+                alert("Please enter a single valid letter.");
+                input.value = '';
+                return;
+            }
+
+            if (guessedLetters.includes(guess)) {
+                alert(`You've already guessed '${guess}'.`);
+                input.value = '';
+                return;
+            }
+
+            guessedLetters.push(guess);
+            document.getElementById('guessed-letters').textContent = guessedLetters.join(', ');
+
+            if (word.includes(guess)) {
+                for (let i = 0; i < word.length; i++) {
+                    if (word[i] === guess) {
+                        guessedWord[i] = guess;
+                    }
+                }
+            } else {
+                attempts--;
+            }
+
+            input.value = '';
+            displayWord();
+            document.getElementById('attempts').textContent = `You have ${attempts} incorrect guesses remaining.`;
+
+            checkGameOver();
+        }
+
+        // Check if the game is over (win or lose)
+        function checkGameOver() {
+            if (!guessedWord.includes('_')) {
+                document.getElementById('message').textContent = `Congratulations! You guessed the word: ${word}`;
+                document.getElementById('letter-input').disabled = true;
+            } else if (attempts <= 0) {
+                document.getElementById('message').textContent = `Game Over! The word was: ${word}`;
+                document.getElementById('letter-input').disabled = true;
+            }
+        }
+
+        // Initialize the game
+        fetchWord();
+    </script>
+
+</body>
+</html>
