@@ -1,22 +1,100 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hangman Game</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Procedural Terrain Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            background: #8ecae6;
+            display: block;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Hangman Game</h1>
-        <canvas id="hangmanCanvas" width="200" height="200"></canvas>
-        <p id="word"></p>
-        <p>Wrong guesses: <span id="wrong-letters"></span></p>
-        <p>Guesses Left: <span id="guesses-left"></span></p>
-        <p>Hint: <span id="hint"></span></p>
-        <input type="text" id="letter-input" maxlength="1" />
-        <button id="guess-button">Guess</button>
-        <button id="restart-button" style="display:none;">Restart</button>
-    </div>
-    <script src="script.js"></script>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const tileSize = 20;
+        const cols = Math.floor(canvas.width / tileSize);
+        const rows = Math.floor(canvas.height / tileSize);
+        const terrain = [];
+        const player = { x: 1, y: 1, resources: { wood: 0, stone: 0 } };
+
+        function generateTerrain() {
+            for (let y = 0; y < rows; y++) {
+                terrain[y] = [];
+                for (let x = 0; x < cols; x++) {
+                    const rand = Math.random();
+                    if (rand < 0.4) terrain[y][x] = 'grass'; // 40% grass
+                    else if (rand < 0.7) terrain[y][x] = 'forest'; // 30% forest
+                    else terrain[y][x] = 'mountain'; // 30% mountain
+                }
+            }
+        }
+
+        function drawTerrain() {
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    if (terrain[y][x] === 'grass') ctx.fillStyle = '#90ee90'; // light green
+                    else if (terrain[y][x] === 'forest') ctx.fillStyle = '#228b22'; // dark green
+                    else ctx.fillStyle = '#8b4513'; // brown
+
+                    ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                }
+            }
+        }
+
+        function drawPlayer() {
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
+        }
+
+        function gatherResource() {
+            if (terrain[player.y][player.x] === 'forest') {
+                player.resources.wood++;
+                alert('You gathered 1 wood! Total wood: ' + player.resources.wood);
+            } else if (terrain[player.y][player.x] === 'mountain') {
+                player.resources.stone++;
+                alert('You gathered 1 stone! Total stone: ' + player.resources.stone);
+            }
+        }
+
+        function movePlayer(dx, dy) {
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+            if (newX >= 0 && newX < cols && newY >= 0 && newY < rows) {
+                player.x = newX;
+                player.y = newY;
+            }
+        }
+
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawTerrain();
+            drawPlayer();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') movePlayer(0, -1);
+            if (e.key === 'ArrowDown') movePlayer(0, 1);
+            if (e.key === 'ArrowLeft') movePlayer(-1, 0);
+            if (e.key === 'ArrowRight') movePlayer(1, 0);
+            if (e.key === ' ') gatherResource(); // Gather resource on space key
+            update();
+        });
+
+        generateTerrain();
+        update();
+    </script>
 </body>
 </html>
