@@ -3,26 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Warrior - Build Your Weapon</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Checkers Game</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Code Warrior</h1>
-        <p>Build your weapon by adding the code below, then fight the enemy!</p>
+    <div id="game">
+        <h1>Checkers</h1>
 
-        <div class="weapon-builder">
-            <h2>Weapon Builder</h2>
-            <textarea id="weapon-code" placeholder="Enter your weapon code here..."></textarea>
-            <button onclick="buildWeapon()">Build Weapon</button>
+        <!-- Game Mode Selection -->
+        <div id="mode-selection">
+            <button onclick="startGame('2-player')">2 Player</button>
+            <button onclick="startGame('easy')">Easy Mode</button>
+            <button onclick="startGame('medium')">Medium Mode</button>
+            <button onclick="startGame('unbeatable')">Unbeatable Mode</button>
         </div>
 
-        <div class="battlefield">
-            <h2>Battlefield</h2>
-            <p><strong>Your Weapon Stats:</strong> <span id="player-stats"></span></p>
-            <p><strong>Enemy Weapon Stats:</strong> <span id="enemy-stats"></span></p>
-            <button onclick="startBattle()">Start Battle</button>
-            <div id="battle-result"></div>
+        <!-- Checkers Board -->
+        <div id="board">
+            <!-- 8x8 grid for checkers -->
+            <table>
+                <tbody id="checkerboard"></tbody>
+            </table>
+        </div>
+
+        <!-- Game Status -->
+        <div id="status">
+            <p id="turn">Turn: Player 1</p>
         </div>
     </div>
 
