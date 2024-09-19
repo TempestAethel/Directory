@@ -1,1 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Shooter</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #87CEEB;
+            overflow: hidden;
+        }
 
+        #gameCanvas {
+            display: block;
+            background-color: #87CEEB;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: white;
+            z-index: 10;
+        }
+
+        .power-up {
+            position: absolute;
+            font-size: 20px;
+            color: yellow;
+            background-color: red;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Score display -->
+    <div class="score">Score: 0</div>
+
+    <!-- Canvas for the game -->
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // Basic setup for canvas and context
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Bird properties
+        const bird = {
+            x: 50,
+            y: canvas.height / 2,
+            width: 40,
+            height: 40,
+            dy: 0,
+            gravity: 0.5,
+            lift: -10,
+            isShooting: false,
+        };
+
+        // Shooting projectiles
+        const projectiles = [];
+        const pipes = [];
+        let score = 0;
+        let gameOver = false;
+
+        // Power-up
+        let powerUp = null;
+
+        // Controls for the bird
+        document.addEventListener('keydown', function (e) {
+            if (e.key === ' ') {
+                bird.dy = bird.lift; // Flap
+            } else if (e.key === 'Enter') {
+                bird.isShooting = true; // Shoot
+            }
+        });
+
+        document.addEventListener('keyup', function (e) {
+            if (e.key === 'Enter') {
+                bird.isShooting = false; // Stop shooting
+            }
+        });
+
+        // Game loop
+        function gameLoop() {
+            if (gameOver) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw bird
+            ctx.fillStyle = 'yellow';
+            ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+
+            // Apply gravity
+            bird.dy += bird.gravity;
+            bird.y += bird.dy;
+
+            // Shoot projectile
+            if (bird.isShooting) {
+                projectiles.push({
+                    x: bird.x + bird.width,
+                    y: bird.y + bird.height / 2 - 5,
+                    width: 10,
+                    height: 5,
+                    dx: 5,
+                });
+            }
+
+            // Draw projectiles
+            for (let i = 0; i < projectiles.length; i++) {
+                const proj = projectiles[i];
+                proj.x += proj.dx;
+                ctx.fillStyle = 'red';
+                ctx.fillRect(proj.x, proj.y, proj.width, proj.height);
+
+                // Remove off-screen projectiles
+                if (proj.x > canvas.width) {
+                    projectiles.splice(i, 1);
+                    i--;
+                }
+            }
+
+            // Draw pipes
+            for (let i = 0; i < pipes.length; i++) {
+                const pipe = pipes[i];
+                pipe.x -= 2; // Move pipes to the left
+
+                ctx.fillStyle = pipe.isIndestructible ? 'gray' : 'green';
+                ctx.fillRect(pipe.x, 0, pipe.width, pipe.heightTop);
+                ctx.fillRect(pipe.x, canvas.height - pipe.heightBottom, pipe.width, pipe.heightBottom);
+
+                // Detect collisions with pipes
+                if (
+                    bird.x < pipe.x + pipe.width &&
+                    bird.x + bird.width > pipe.x &&
+                    (bird.y < pipe.heightTop || bird.y + bird.height > canvas.height - pipe.heightBottom)
+                ) {
+                    gameOver = true; // Collision detected
+                }
+
+                // Remove pipes that go off-screen
+                if (pipe.x + pipe.width < 0) {
+                    pipes.splice(i, 1);
+                    i--;
+                    score++;
+                    document.querySelector('.score').textContent = `Score: ${score}`;
+                }
+            }
+
+            // Add new pipes
+            if (pipes.length < 5 || pipes[pipes.length - 1].x < canvas.width - 200) {
+                pipes.push({
+                    x: canvas.width,
+                    width: 60,
+                    heightTop: Math.random() * (canvas.height / 2),
+                    heightBottom: Math.random() * (canvas.height / 2),
+                    isIndestructible: Math.random() < 0.3, // 30% chance for indestructible pipes
+                });
+            }
+
+            // Game over when bird hits the bottom
+            if (bird.y + bird.height > canvas.height) {
+                gameOver = true;
+            }
+
+            // Keep game loop running
+            if (!gameOver) {
+                requestAnimationFrame(gameLoop);
+            } else {
+                alert('Game Over!');
+            }
+        }
+
+        // Start game loop
+        gameLoop();
+    </script>
+</body>
+</html>
