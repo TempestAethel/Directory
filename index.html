@@ -1,188 +1,141 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkers</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #2c2c2c;
-            color: white;
-        }
+	<title>
+		
+	</title>
+	<link rel="stylesheet" href="style.css">
 
-        .board {
-            display: grid;
-            grid-template-columns: repeat(8, 80px);
-            grid-gap: 2px;
-            margin-bottom: 20px;
-        }
-
-        .cell {
-            width: 80px;
-            height: 80px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .dark {
-            background-color: #333;
-        }
-
-        .light {
-            background-color: #eee;
-        }
-
-        .piece {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: red;
-            cursor: pointer;
-        }
-
-        .piece.king {
-            background-color: gold;
-        }
-
-        .controls {
-            margin-bottom: 20px;
-        }
-
-        select {
-            padding: 10px;
-            font-size: 16px;
-            margin-right: 10px;
-        }
-
-        button {
-            padding: 10px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .status {
-            margin-top: 20px;
-            text-align: center;
-        }
-    </style>
 </head>
-<body>
-    <div class="controls">
-        <select id="mode-selection">
-            <option value="0">2 Player Mode</option>
-            <option value="1">Kid Mode</option>
-            <option value="2">Human Mode</option>
-            <option value="3">Unbeatable Mode</option>
-        </select>
-        <button id="reset-button">Reset Game</button>
-    </div>
+<body id="ht">
+<!-- astea 2 sunt puse ca indexarea claselor sa inceapa de la 1 -->
+<div class="checker white_checker" style="display:none"> </div>
+<div class="checker black_checker" style="display:none"> </div>
 
-    <div class="board" id="board"></div>
-    <div class="status">
-        <p id="game-status">Player Red's turn</p>
-    </div>
 
-    <script>
-        const boardElement = document.getElementById('board');
-        const statusText = document.getElementById('game-status');
-        const modeSelection = document.getElementById('mode-selection');
-        const resetButton = document.getElementById('reset-button');
+<div class="square" style="display: none" id ="ht"> </div>
+<div class="black_background" id="black_background"> </div>
 
-        let currentPlayer = 'Red';
-        let gameActive = true;
-        let board = [];
-        let gameMode = 0; // 0 = 2 Player, 1 = Kid Mode, 2 = Human Mode, 3 = Unbeatable Mode
+	<div class="score" id="score">
+		<br>
+	</div>
+<div class="table" id="table">
 
-        function initializeBoard() {
-            board = [];
-            boardElement.innerHTML = '';
-            for (let i = 0; i < 8; i++) {
-                let row = [];
-                for (let j = 0; j < 8; j++) {
-                    const cell = document.createElement('div');
-                    cell.classList.add('cell');
-                    if ((i + j) % 2 === 0) {
-                        cell.classList.add('light');
-                    } else {
-                        cell.classList.add('dark');
-                        if (i < 3) {
-                            const piece = createPiece('Red');
-                            cell.appendChild(piece);
-                        } else if (i > 4) {
-                            const piece = createPiece('Black');
-                            cell.appendChild(piece);
-                        }
-                    }
-                    boardElement.appendChild(cell);
-                    row.push(cell);
-                }
-                board.push(row);
-            }
-        }
+	<div class="checker white_checker"> </div>
+	<div class="checker white_checker"> </div>
+	<div class="checker white_checker"> </div>
+	<div class="checker white_checker"> </div>
+	<div class="checker white_checker"> </div>
+	<div class="checker white_checker"> </div>
+	<div class="checker white_checker"> </div>
+	<div class="checker white_checker"> </div>	
+	<div class="checker white_checker"> </div>
+	<div class="checker white_checker"> </div>
+	<div class="checker white_checker"> </div>
+	<div class="checker white_checker"> </div>	
 
-        function createPiece(player) {
-            const piece = document.createElement('div');
-            piece.classList.add('piece');
-            piece.dataset.player = player;
-            if (player === 'Red') {
-                piece.style.backgroundColor = 'red';
-            } else {
-                piece.style.backgroundColor = 'black';
-            }
-            piece.addEventListener('click', handlePieceClick);
-            return piece;
-        }
+	<div class="checker black_checker"> </div>
+	<div class="checker black_checker"> </div>
+	<div class="checker black_checker"> </div>
+	<div class="checker black_checker"> </div>
+	<div class="checker black_checker"> </div>
+	<div class="checker black_checker"> </div>
+	<div class="checker black_checker"> </div>
+	<div class="checker black_checker"> </div>
+	<div class="checker black_checker"> </div>
+	<div class="checker black_checker"> </div>
+	<div class="checker black_checker"> </div>
+	<div class="checker black_checker"> </div>
 
-        function handlePieceClick(event) {
-            const piece = event.target;
-            const player = piece.dataset.player;
 
-            if (player !== currentPlayer) return;
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="clear_float"> </div>
+	
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="clear_float"> </div>
 
-            // Move logic for the player will go here (select piece, move, etc.)
-            // Depending on the gameMode, AI moves will be handled after the player's turn
-        }
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="clear_float"> </div>
 
-        function checkForWinner() {
-            const redPieces = document.querySelectorAll('.piece[data-player="Red"]').length;
-            const blackPieces = document.querySelectorAll('.piece[data-player="Black"]').length;
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="clear_float"> </div>
 
-            if (redPieces === 0) {
-                statusText.innerText = 'Black wins!';
-                gameActive = false;
-            } else if (blackPieces === 0) {
-                statusText.innerText = 'Red wins!';
-                gameActive = false;
-            }
-        }
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="clear_float"> </div>
 
-        function resetBoard() {
-            initializeBoard();
-            currentPlayer = 'Red';
-            gameActive = true;
-            statusText.innerText = "Player Red's turn";
-        }
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="clear_float"> </div>
 
-        resetButton.addEventListener('click', resetBoard);
-        modeSelection.addEventListener('change', (e) => {
-            gameMode = parseInt(e.target.value);
-            resetBoard();
-        });
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="clear_float"> </div>
 
-        initializeBoard();
-    </script>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="square white_square"> </div>
+	<div class="square black_square"> </div>
+	<div class="clear_float"> </div>
+
+</div>
+
+<audio id="moveSound">
+	<source src = "sounds/move.mp3"> 
+</audio>
+<audio id="winSound">
+	<<source src="sounds/win.mp3">
+</audio>
+<script src="script.js" > </script>
 </body>
 </html>
