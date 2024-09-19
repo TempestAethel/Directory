@@ -3,227 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Shooter</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #87CEEB;
-            overflow: hidden;
-        }
-
-        #gameCanvas {
-            display: block;
-            background-color: #87CEEB;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        .score {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 24px;
-            color: white;
-            z-index: 10;
-        }
-
-        .game-over {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            color: red;
-            z-index: 20;
-            display: none;
-        }
-    </style>
+    <title>Code Warrior - Build Your Weapon</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <h1>Code Warrior</h1>
+        <p>Build your weapon by adding the code below, then fight the enemy!</p>
 
-    <!-- Score display -->
-    <div class="score">Score: 0</div>
-    <div class="game-over">Game Over! Press Space to Restart</div>
+        <div class="weapon-builder">
+            <h2>Weapon Builder</h2>
+            <textarea id="weapon-code" placeholder="Enter your weapon code here..."></textarea>
+            <button onclick="buildWeapon()">Build Weapon</button>
+        </div>
 
-    <!-- Canvas for the game -->
-    <canvas id="gameCanvas"></canvas>
+        <div class="battlefield">
+            <h2>Battlefield</h2>
+            <p><strong>Your Weapon Stats:</strong> <span id="player-stats"></span></p>
+            <p><strong>Enemy Weapon Stats:</strong> <span id="enemy-stats"></span></p>
+            <button onclick="startBattle()">Start Battle</button>
+            <div id="battle-result"></div>
+        </div>
+    </div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        let bird = {
-            x: 50,
-            y: canvas.height / 2,
-            width: 40,
-            height: 40,
-            dy: 0,
-            gravity: 0.5,
-            lift: -10,
-            isShooting: false,
-            alive: true
-        };
-
-        let projectiles = [];
-        let pipes = [];
-        let score = 0;
-        let gameOver = false;
-
-        function resetGame() {
-            bird.y = canvas.height / 2;
-            bird.dy = 0;
-            pipes = [];
-            projectiles = [];
-            score = 0;
-            gameOver = false;
-            bird.alive = true;
-            document.querySelector('.game-over').style.display = 'none';
-            document.querySelector('.score').textContent = `Score: ${score}`;
-        }
-
-        function drawBird() {
-            ctx.fillStyle = 'yellow';
-            ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
-        }
-
-        function drawProjectiles() {
-            for (let i = 0; i < projectiles.length; i++) {
-                const proj = projectiles[i];
-                proj.x += proj.dx;
-                ctx.fillStyle = 'red';
-                ctx.fillRect(proj.x, proj.y, proj.width, proj.height);
-
-                // Remove off-screen projectiles
-                if (proj.x > canvas.width) {
-                    projectiles.splice(i, 1);
-                    i--;
-                }
-            }
-        }
-
-        function drawPipes() {
-            for (let i = 0; i < pipes.length; i++) {
-                const pipe = pipes[i];
-                pipe.x -= 2;
-
-                ctx.fillStyle = pipe.isIndestructible ? 'gray' : 'green';
-                ctx.fillRect(pipe.x, 0, pipe.width, pipe.heightTop);
-                ctx.fillRect(pipe.x, canvas.height - pipe.heightBottom, pipe.width, pipe.heightBottom);
-
-                // Detect collision with pipes
-                if (bird.alive && bird.x < pipe.x + pipe.width && bird.x + bird.width > pipe.x &&
-                    (bird.y < pipe.heightTop || bird.y + bird.height > canvas.height - pipe.heightBottom)) {
-                    gameOver = true;
-                }
-
-                // Remove pipes that go off-screen and increase score
-                if (pipe.x + pipe.width < 0) {
-                    pipes.splice(i, 1);
-                    i--;
-                    score++;
-                    document.querySelector('.score').textContent = `Score: ${score}`;
-                }
-            }
-        }
-
-        function addPipe() {
-            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 300) {
-                pipes.push({
-                    x: canvas.width,
-                    width: 60,
-                    heightTop: Math.random() * (canvas.height / 2),
-                    heightBottom: Math.random() * (canvas.height / 2),
-                    isIndestructible: Math.random() < 0.3 // 30% indestructible pipes
-                });
-            }
-        }
-
-        function handleShooting() {
-            if (bird.isShooting) {
-                projectiles.push({
-                    x: bird.x + bird.width,
-                    y: bird.y + bird.height / 2 - 5,
-                    width: 10,
-                    height: 5,
-                    dx: 5
-                });
-            }
-        }
-
-        function handleCollisions() {
-            // Check if projectiles hit pipes
-            for (let i = 0; i < projectiles.length; i++) {
-                for (let j = 0; j < pipes.length; j++) {
-                    const proj = projectiles[i];
-                    const pipe = pipes[j];
-
-                    if (proj.x + proj.width > pipe.x && proj.x < pipe.x + pipe.width &&
-                        (proj.y < pipe.heightTop || proj.y + proj.height > canvas.height - pipe.heightBottom)) {
-                        if (!pipe.isIndestructible) {
-                            pipes.splice(j, 1); // Destroy pipe
-                            projectiles.splice(i, 1); // Remove projectile
-                            i--;
-                        }
-                    }
-                }
-            }
-        }
-
-        function gameLoop() {
-            if (gameOver) {
-                bird.alive = false;
-                document.querySelector('.game-over').style.display = 'block';
-                return;
-            }
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Bird physics
-            bird.dy += bird.gravity;
-            bird.y += bird.dy;
-
-            if (bird.y + bird.height > canvas.height) {
-                bird.y = canvas.height - bird.height;
-                gameOver = true;
-            }
-
-            if (bird.y < 0) {
-                bird.y = 0;
-            }
-
-            drawBird();
-            drawProjectiles();
-            handleShooting();
-            addPipe();
-            drawPipes();
-            handleCollisions();
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        document.addEventListener('keydown', function (e) {
-            if (e.key === ' ') {
-                if (gameOver) {
-                    resetGame();
-                } else {
-                    bird.dy = bird.lift; // Flap wings
-                }
-            } else if (e.key === 'Enter') {
-                bird.isShooting = true;
-            }
-        });
-
-        document.addEventListener('keyup', function (e) {
-            if (e.key === 'Enter') {
-                bird.isShooting = false;
-            }
-        });
-
-        gameLoop();
-    </script>
-
+    <script src="script.js"></script>
 </body>
 </html>
