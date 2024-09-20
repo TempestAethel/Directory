@@ -1,141 +1,122 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<title>
-		
-	</title>
-	<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dots and Boxes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
 
+        .grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .dot {
+            width: 20px;
+            height: 20px;
+            background-color: black;
+            border-radius: 50%;
+        }
+
+        .horizontal-line, .vertical-line {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            background-color: lightgray;
+        }
+
+        .horizontal-line {
+            width: 40px;
+            height: 10px;
+        }
+
+        .vertical-line {
+            height: 40px;
+            width: 10px;
+        }
+
+        .box {
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .selected {
+            background-color: blue;
+        }
+    </style>
 </head>
-<body id="ht">
-<!-- astea 2 sunt puse ca indexarea claselor sa inceapa de la 1 -->
-<div class="checker white_checker" style="display:none"> </div>
-<div class="checker black_checker" style="display:none"> </div>
+<body>
 
+<h1>Dots and Boxes Game</h1>
 
-<div class="square" style="display: none" id ="ht"> </div>
-<div class="black_background" id="black_background"> </div>
-
-	<div class="score" id="score">
-		<br>
-	</div>
-<div class="table" id="table">
-
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>	
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>	
-
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-
-
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="clear_float"> </div>
-	
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="clear_float"> </div>
-
+<div>
+    <label for="gridSize">Enter grid size (e.g. 3 for 3x3): </label>
+    <input type="number" id="gridSize" min="2" value="3">
+    <button onclick="generateGrid()">Generate Grid</button>
 </div>
 
-<audio id="moveSound">
-	<source src = "sounds/move.mp3"> 
-</audio>
-<audio id="winSound">
-	<<source src="sounds/win.mp3">
-</audio>
-<script src="script.js" > </script>
+<div id="gameBoard"></div>
+
+<script>
+    function generateGrid() {
+        const gridSize = parseInt(document.getElementById("gridSize").value);
+        const gameBoard = document.getElementById("gameBoard");
+        gameBoard.innerHTML = ''; // Clear the previous board
+
+        // Create a grid with dots, lines, and boxes
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+        grid.style.gridTemplateColumns = `repeat(${gridSize * 2 - 1}, auto)`;
+        grid.style.gridTemplateRows = `repeat(${gridSize * 2 - 1}, auto)`;
+
+        for (let row = 0; row < gridSize * 2 - 1; row++) {
+            for (let col = 0; col < gridSize * 2 - 1; col++) {
+                const isDot = (row % 2 === 0) && (col % 2 === 0);
+                const isHorizontalLine = (row % 2 === 0) && (col % 2 !== 0);
+                const isVerticalLine = (row % 2 !== 0) && (col % 2 === 0);
+                const isBox = (row % 2 !== 0) && (col % 2 !== 0);
+
+                if (isDot) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    grid.appendChild(dot);
+                } else if (isHorizontalLine) {
+                    const hLine = document.createElement('div');
+                    hLine.className = 'horizontal-line';
+                    hLine.onclick = function () { selectLine(this); };
+                    grid.appendChild(hLine);
+                } else if (isVerticalLine) {
+                    const vLine = document.createElement('div');
+                    vLine.className = 'vertical-line';
+                    vLine.onclick = function () { selectLine(this); };
+                    grid.appendChild(vLine);
+                } else if (isBox) {
+                    const box = document.createElement('div');
+                    box.className = 'box';
+                    grid.appendChild(box);
+                }
+            }
+        }
+        gameBoard.appendChild(grid);
+    }
+
+    function selectLine(line) {
+        if (!line.classList.contains('selected')) {
+            line.classList.add('selected');
+        }
+    }
+
+    // Generate an initial grid on page load
+    window.onload = generateGrid;
+</script>
+
 </body>
 </html>
