@@ -3,54 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pip's Adventure in the Magical Forest</title>
+    <title>Pip's Adventure</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Pip's Adventure in the Magical Forest</h1>
-        <p>Join Pip on a quest to rescue their friend Lily!</p>
-    </header>
-
-    <section id="story">
-        <h2>Story</h2>
-        <p>Pip, a brave little creature, must navigate through a perilous forest to rescue their friend, Lily, from an evil sorcerer.</p>
-    </section>
-
-    <section id="gameplay">
-        <h2>Gameplay</h2>
-        <ul>
-            <li>Classic platforming mechanics: Jumping, running, and wall-jumping.</li>
-            <li>Obstacles: Spikes, moving platforms, and dangerous creatures.</li>
-            <li>Power-ups: Collect items to gain temporary abilities like super jumps or fireballs.</li>
-            <li>Boss battles: Face off against powerful enemies at the end of each level.</li>
-        </ul>
-    </section>
-
-    <section id="visuals">
-        <h2>Visuals</h2>
-        <p>Experience the game with a retro-inspired pixel art style featuring vibrant colors to create a magical atmosphere.</p>
-    </section>
-
-    <section id="level-design">
-        <h2>Level Design</h2>
-        <ul>
-            <li>Variety: Diverse levels with different challenges and themes, such as a haunted forest, a fiery volcano, and a snowy mountain.</li>
-            <li>Secrets: Hidden secrets and collectibles throughout the levels for players to discover.</li>
-        </ul>
-    </section>
-
-    <section id="features">
-        <h2>Additional Features</h2>
-        <ul>
-            <li>Multiplayer co-op: Team up and explore the forest together.</li>
-            <li>Leaderboards: Track players' scores and achievements.</li>
-            <li>Customizable characters: Create your own unique Pip.</li>
-        </ul>
-    </section>
-
-    <footer>
-        <p>&copy; 2023 Pip's Adventure. All rights reserved.</p>
-    </footer>
+    <div id="gameArea">
+        <div id="pip"></div>
+        <div class="platform" style="top: 350px; left: 100px; width: 200px;"></div>
+        <div class="platform" style="top: 250px; left: 300px; width: 150px;"></div>
+        <div class="platform" style="top: 150px; left: 500px; width: 200px;"></div>
+        <div class="spike" style="top: 400px; left: 150px;"></div>
+        <div id="scoreBoard">Score: 0</div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
