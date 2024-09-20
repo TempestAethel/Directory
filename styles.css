@@ -1,0 +1,31 @@
+body {
+    background-color: #e0f7fa; /* Light cyan background */
+    font-family: 'Courier New', Courier, monospace; /* Pixel art type font */
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+header, section, footer {
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px;
+    background-color: rgba(255, 255, 255, 0.8); /* White background with some transparency */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+h1, h2 {
+    text-align: center;
+    color: #ff5722; /* A vibrant orange color */
+}
+
+ul {
+    list-style-type: none; /* Remove default bullet points */
+    padding: 0;
+}
+
+footer {
+    text-align: center;
+    font-size: 0.8em;
+    color: #777;
+}
