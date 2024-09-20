@@ -1,122 +1,567 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dots and Boxes</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dots and Boxes Game</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
+
+        @import url('https://fonts.googleapis.com/css?family=Schoolbell&v1');
+
+        *{
+          -webkit-box-sizing: border-box;
+                  box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          margin:0;
         }
 
-        .grid {
-            display: grid;
-            gap: 10px;
-            margin-top: 20px;
+        body{
+          font-family: 'Schoolbell';
+          font-size: 23px;
+          background-color: #FFF;
+          overflow-x: hidden;
         }
 
-        .dot {
-            width: 20px;
-            height: 20px;
-            background-color: black;
-            border-radius: 50%;
+        .a-four{
+          width: 20cm;
+          min-height: 29.7cm;
+          margin: 1cm auto;
+          border: 1px #D3D3D3 solid;
+          border-radius: 5px;
+          -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+                  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
 
-        .horizontal-line, .vertical-line {
-            width: 20px;
-            height: 20px;
+        .cover {
+          margin: unset;
+          z-index: 9;
+          background: transparent url('cover.png') no-repeat center center;
+          background-size:cover;
+          -webkit-transform: rotateY(0deg);
+                  transform: rotateY(0deg);
+          position: absolute;
+          -webkit-transform-origin: 100% 0;
+              -ms-transform-origin: 100% 0;
+                  transform-origin: 100% 0;
+          -webkit-box-shadow: inset 3px 0px 20px rgba(0, 0, 0, 0.2),
+            0px 0px 15px rgba(0, 0, 0, 0.1);
+                  box-shadow: inset 3px 0px 20px rgba(0, 0, 0, 0.2),
+            0px 0px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .cover span{
+            width: 100%;
+            position: absolute;
+            text-align: center;
+            top: 15%;
+            color: #352d24;
+            font-size: 40px;
+            font-weight: bolder;
             cursor: pointer;
-            background-color: lightgray;
+            margin: unset;
+            opacity: 0.8
         }
 
-        .horizontal-line {
-            width: 40px;
-            height: 10px;
+        .cover input{
+            display: block;
+            margin: 5px;
+            width: 15%;
+            text-align: center;
+            color: #352d24;
+            opacity: 0.4;
         }
 
-        .vertical-line {
-            height: 40px;
-            width: 10px;
+        .danger{
+          border:solid 1px red;
+        }
+
+        .cover.flip {
+          -webkit-animation: FlipCover 3s forwards;
+                  animation: FlipCover 3s forwards;
+        }
+
+        .cover.close {
+          -webkit-transform: rotateY(180deg);
+                  transform: rotateY(180deg);
+          -webkit-animation: CloseCover 1s forwards;
+                  animation: CloseCover 1s forwards;
+        }
+
+        .container
+        {
+          background-image:
+              -o-repeating-linear-gradient(#53CAFF 0 1px, transparent 1px 100%);
+          background-image:
+              repeating-linear-gradient(#53CAFF 0 1px, transparent 1px 100%);
+          background-size: 8px 8px;
+        }
+
+        .score-board, .game
+        {
+           display: inline-block;
+        }
+
+        .game
+        {
+           width:75%;
+        }
+
+        .score-board
+        {
+           position: absolute;
+           padding:8px;
+        }
+
+        .score-board span
+        {
+          cursor: pointer;
+        }
+
+        .color-box {
+          display: inline-block;
+          width: 10px;
+          height:10px;
         }
 
         .box {
-            width: 40px;
-            height: 40px;
-            background-color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+          margin: 50px auto;
+          width: 40px;
+          height:40px;
+          position:relative;
+          display: none;
+          overflow: hidden;
         }
 
-        .selected {
-            background-color: blue;
+        .show{
+          display: table-cell;
+        }
+
+        .no-pointer{
+          pointer-events: none;
+        }
+
+        .top,.left,.bottom{
+          background:#594080;
+        }
+
+        .top{
+          position:absolute;
+          width:0%;
+          height:5%;
+          -webkit-animation: WidthAnimation 0.5s forwards;
+                  animation: WidthAnimation 0.5s forwards;
+        }
+
+        .left{
+          position:absolute;
+          width:5%;
+          height:0%;
+          -webkit-animation: HeightAnimation 0.5s forwards;
+                  animation: HeightAnimation 0.5s forwards; 
+        }
+
+        .bottom{
+          position:absolute;
+          bottom:0px;
+          width:0%;
+          height:5%;
+          -webkit-animation: WidthAnimation 0.5s forwards;
+                  animation: WidthAnimation 0.5s forwards;
+        }
+
+        .left:hover,.top:hover,.bottom:hover{
+          cursor:pointer;
+        }
+
+        .box-end{
+          width:2px
+        }
+
+        .border-end{
+          width:100%
+        }
+
+        .new-line{
+          clear:both;
+        }
+
+        .new-line + .box > .left , .border-end{
+          background:red;
+        }
+
+        .disabled{
+          pointer-events: none
+        }
+
+        .check {
+            position: relative;
+        }
+
+        .check::before,
+        .check::after {
+            position: absolute;
+            content: '';
+            width: 100%;
+            height: 1px;
+            background-color: var(--color);
+            top:0px;
+            -webkit-animation: fromTopAnimation 0.3s forwards;
+                    animation: fromTopAnimation 0.3s forwards;
+        }
+
+        .check::before {
+            -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                    transform: rotate(45deg);
+        }
+
+        .check::after {
+            -webkit-transform: rotate(-45deg);
+                -ms-transform: rotate(-45deg);
+                    transform: rotate(-45deg);
+        }
+
+        .hide{
+          -webkit-animation: fadeInToNone 1.5s forwards;
+                  animation: fadeInToNone 1.5s forwards;
+        }
+
+        /*animations*/
+        @-webkit-keyframes fromTopAnimation {
+          100% {top:20px}
+        }
+
+        @-webkit-keyframes FlipCover {
+          100% {-webkit-transform: rotateY(180deg);transform: rotateY(180deg);background: #e9e6c4}
+        }
+
+        @-webkit-keyframes CloseCover {
+          0% {-webkit-transform: rotateY(180deg);transform: rotateY(180deg);background: #e9e6c4}
+          100% {-webkit-transform: rotateY(360deg);transform: rotateY(360deg);}
+        }
+
+        @-webkit-keyframes WidthAnimation {
+          100% {width: 100%}
+        }
+
+        @-webkit-keyframes HeightAnimation {
+          100% {height: 100%}
+        }
+
+        @-webkit-keyframes fadeInToNone {
+          100% {opacity: 0}
+        }
+
+        /*responsive*/
+        @media (max-width: 480px) {
+          .game{
+            width: 100%;
+            display: block;
+          }
+
+          .score-board, .game
+          {
+            position:relative;
+          }
         }
     </style>
 </head>
 <body>
+    <div class="container a-four"></div>
+    <script>
+        (function(){
+            const Players = [
+                new Player("Amine","#056305", 0, 0, true),
+                new Player("Jhon","orange", 0, 0, false),
+                new Player("Felipe","#b70505", 0, 0, false)
+            ];
 
-<h1>Dots and Boxes Game</h1>
+            function Player(name,color, borders, boxs, turn) {
+              this.name = name;
+              this.color = color;
+              this.borders = borders;
+              this.boxs = boxs;
+              this.turn = turn;
+            }
 
-<div>
-    <label for="gridSize">Enter grid size (e.g. 3 for 3x3): </label>
-    <input type="number" id="gridSize" min="2" value="3">
-    <button onclick="generateGrid()">Generate Grid</button>
-</div>
+            Player.prototype.board = function() {
+              return `<div data-userColor="${this.color}"> <div class="color-box" style="background-color:${this.color}"></div> ${this.name} : <b> <span>${this.boxs}</span> / <span> ${this.borders} </span> </b> </p>`;
+            };
 
-<div id="gameBoard"></div>
+            Array.prototype.next = function(str) {
+              const i = this.indexOf(str);
+              if (i === -1) return undefined;
+              return { nextPlayer : this[(i + 1) % this.length] , index : i };
+            };
 
-<script>
-    function generateGrid() {
-        const gridSize = parseInt(document.getElementById("gridSize").value);
-        const gameBoard = document.getElementById("gameBoard");
-        gameBoard.innerHTML = ''; // Clear the previous board
+            let boxsCount = null;
+            let rowsCount = null;
+            let _checkedd = false;
+            let fragment = document.createDocumentFragment();
 
-        // Create a grid with dots, lines, and boxes
-        const grid = document.createElement('div');
-        grid.className = 'grid';
-        grid.style.gridTemplateColumns = `repeat(${gridSize * 2 - 1}, auto)`;
-        grid.style.gridTemplateRows = `repeat(${gridSize * 2 - 1}, auto)`;
+            const open = document.querySelector('.cover span');
+            const container = document.querySelector('.container');
+            const getBoxsCount = () => document.getElementById('boxsCount').value; 
+            const getRowsCount = () => document.getElementById('rowsCount').value;
 
-        for (let row = 0; row < gridSize * 2 - 1; row++) {
-            for (let col = 0; col < gridSize * 2 - 1; col++) {
-                const isDot = (row % 2 === 0) && (col % 2 === 0);
-                const isHorizontalLine = (row % 2 === 0) && (col % 2 !== 0);
-                const isVerticalLine = (row % 2 !== 0) && (col % 2 === 0);
-                const isBox = (row % 2 !== 0) && (col % 2 !== 0);
+            const createNode = (element) => document.createElement(element);
+            const append = (parent, el) => parent.appendChild(el);
+            const firstBox = (i) => i == 0;
+            const lastBox = (i) => i == boxsCount-1;
 
-                if (isDot) {
-                    const dot = document.createElement('div');
-                    dot.className = 'dot';
-                    grid.appendChild(dot);
-                } else if (isHorizontalLine) {
-                    const hLine = document.createElement('div');
-                    hLine.className = 'horizontal-line';
-                    hLine.onclick = function () { selectLine(this); };
-                    grid.appendChild(hLine);
-                } else if (isVerticalLine) {
-                    const vLine = document.createElement('div');
-                    vLine.className = 'vertical-line';
-                    vLine.onclick = function () { selectLine(this); };
-                    grid.appendChild(vLine);
-                } else if (isBox) {
-                    const box = document.createElement('div');
-                    box.className = 'box';
-                    grid.appendChild(box);
+            const nextTurn = () => {
+                var result  = Players.next(Players.find( player => player.turn ));
+                result.nextPlayer.turn = true;
+                Players[result.index].turn = false;
+            };
+
+            const incBoders = () => {
+              const player = Players.find( player => player.turn );
+              player.borders++;
+              document.querySelector('[data-userColor="'+player.color+'"]').getElementsByTagName('span')[1].innerHTML = player.borders;
+            };
+
+            const incBoxes = () => {
+              const player = Players.find( player => player.turn );
+              player.boxs++;
+              document.querySelector('[data-userColor="'+player.color+'"]').getElementsByTagName('span')[0].innerHTML = player.boxs;
+            };
+
+            const changeColor = () => Players.find( player => player.turn ).color;
+
+            function setAttributes(elem) {
+                for (var i = 1; i < arguments.length; i+=2) {
+                    elem.setAttribute(arguments[i], arguments[i+1]);
                 }
             }
-        }
-        gameBoard.appendChild(grid);
-    }
 
-    function selectLine(line) {
-        if (!line.classList.contains('selected')) {
-            line.classList.add('selected');
-        }
-    }
+            function showDivsAnimation() {
+              var elements = document.querySelectorAll('.box:not(.show)');
+              if (elements.length) {
+                elements[0].classList.add('show');
+                setTimeout(showDivsAnimation,30);
+              }
+            }
 
-    // Generate an initial grid on page load
-    window.onload = generateGrid;
-</script>
+            function hoverBorders(){
+              document.querySelectorAll('.box > div').forEach(item => {
+                  item.addEventListener('mouseover', event => {
+                    item.style.background = changeColor();
+                  })
+                  item.addEventListener('mouseout', event => {
+                    if(!item.classList.contains('disabled')){
+                      item.style.background = null;
+                    }
+                  })
+              })
+            }
 
+            function clickedBorder(item){
+                item.style.background = changeColor();
+                item.classList.add('disabled');
+                incBoders();
+                hoverBorders();
+                if(!checkBorders(item)) nextTurn();
+                _checkedd = false;
+            }
+
+            function watchBoxes(){
+              document.querySelectorAll('.top').forEach(item => {
+                  item.addEventListener('click', event => {
+                    item.parentNode.dataset.top = "1";
+                    clickedBorder(item);
+                  })
+              })
+              document.querySelectorAll('.left').forEach(item => {
+                  item.addEventListener('click', event => {
+                    item.parentNode.dataset.left = "1";
+                    clickedBorder(item);
+                  })
+              })
+              document.querySelectorAll('.bottom').forEach(item => {
+                  item.addEventListener('click', event => {
+                    item.parentNode.dataset.bottom = "1";
+                    clickedBorder(item);
+                  })
+              })
+            }
+
+            function checkBorders(item){
+                if (item == null ) return;
+                let check = false;
+                let bottomBox = document.querySelector('[data-row="'+(parseInt(item.parentNode.dataset.row) + 1)+'"][data-box="'+parseInt(item.parentNode.dataset.box)+'"]');
+
+                let isLastRow =  bottomBox == null;
+                let bottomLeft = item.parentNode.hasAttribute('data-left');
+                let bottomTop = item.parentNode.hasAttribute('data-top');
+                let nextBoxLeftBorder = document.querySelector('[data-row="'+parseInt(item.parentNode.dataset.row)+'"][data-box="'+(parseInt(item.parentNode.dataset.box) + 1)+'"]').hasAttribute('data-left');
+
+                if(isLastRow){
+                  let boxBottom = item.parentNode.hasAttribute('data-bottom');
+                  check = bottomLeft && bottomTop && boxBottom && nextBoxLeftBorder;
+                }else{
+                  let bottomBoxTopBorder = bottomBox.hasAttribute('data-top');
+                  check = bottomLeft && bottomTop && bottomBoxTopBorder && nextBoxLeftBorder;
+                }
+
+                if(check){
+                  _checkedd = true;
+                  item.parentNode.style.setProperty('--color',changeColor());
+                  item.parentNode.classList.add('check');
+                  incBoxes();
+                }
+
+                if(item.classList.contains('top')  && item.parentNode.dataset.row != 1){
+                    checkBorders(document.querySelector('[data-row="'+(parseInt(item.parentNode.dataset.row) - 1)+'"][data-box="'+parseInt(item.parentNode.dataset.box)+'"]:not(.check) > .top'))
+                }else if(item.classList.contains('left') && item.parentNode.dataset.box > 0){
+                    checkBorders(document.querySelector('[data-row="'+(parseInt(item.parentNode.dataset.row))+'"][data-box="'+(parseInt(item.parentNode.dataset.box) - 1)+'"]:not(.check) > .left'))
+                }
+
+                return _checkedd; 
+            }
+
+            function buildGame(){
+
+                const cover = createNode("div");
+                cover.classList.add('cover','a-four');
+
+                const boxsCountInput = createNode("INPUT");
+                setAttributes(boxsCountInput, 
+                    "type", "number",
+                    "id", "boxsCount",
+                    "placeholder", "boxsCount",
+                    "min", "4",
+                    "max", "19");
+                append(cover,boxsCountInput);
+
+                const rowsCountInput = createNode("INPUT");
+                setAttributes(rowsCountInput, 
+                    "type", "number",
+                    "id", "rowsCount",
+                    "placeholder", "rowsCount",
+                    "min", "4",
+                    "max", "28");
+                append(cover,rowsCountInput);
+
+                const coverSpan = createNode("span");
+                append(coverSpan,document.createTextNode('# Open #'));
+                append(cover,coverSpan);
+                append(fragment,cover);
+
+                append(container,fragment);
+                fragment = document.createDocumentFragment();
+
+                coverSpan.addEventListener('click', function(){
+
+                    boxsCount = getBoxsCount();
+                    rowsCount = getRowsCount();
+
+                    if(boxsCount == "" || rowsCount == ""){
+                      boxsCountInput.classList.add('danger');
+                      rowsCountInput.classList.add('danger');
+                      return;
+                    }
+
+                    this.classList.add('disabled');
+
+                    const game = createNode("div");
+                    game.classList.add('game');
+
+                    for (var j = 0; j < rowsCount; j++) {
+                      for (var i = 0; i < boxsCount; i++) {
+                        if(firstBox(i)){
+                          const newLine = createNode("div");
+                          newLine.classList.add('new-line');
+                          append(game,newLine)
+                        }
+
+                        const boxdDiv = createNode("div");
+                        boxdDiv.classList.add('box');
+                        setAttributes(boxdDiv, 
+                            "data-row", j,
+                            "data-box", i);
+
+                        if(firstBox(i) || lastBox(i) || j > 0){
+                          firstBox(i) ? boxdDiv.dataset.left = "1" : null;
+                          if(lastBox(i)){
+                            boxdDiv.dataset.left = "1";
+                            boxdDiv.classList.add('box-end')
+                          }  
+
+                          if(j > 0){
+                            const topBorder = createNode("div");
+                            topBorder.classList.add('top'); 
+                            append(boxdDiv,topBorder)
+                          }
+
+                          const leftBorder = createNode("div");
+                          const  leftBorderClasses = lastBox(i) ? ['left','border-end','no-pointer'] : firstBox(i) ? ['left','disabled'] : ['left'] ;
+                          [...leftBorderClasses].map(x => leftBorder.classList.add(x));
+                          append(boxdDiv,leftBorder)
+
+                          if(j == rowsCount -1){
+                            const bottomBorder = createNode("div");
+                            bottomBorder.classList.add('bottom'); 
+                            append(boxdDiv,bottomBorder)
+                          }
+
+                        }else{
+                          boxdDiv.classList.add('no-pointer');
+                        }
+
+                        append(game,boxdDiv)
+                        append(fragment,game);
+                      }
+                    }
+
+                    const scoreBoard = createNode("div");
+                    scoreBoard.classList.add('score-board');
+
+                    Players.forEach( (player) => scoreBoard.innerHTML += player.board());
+
+                    const restartSpan = createNode("span");
+                    append(restartSpan,document.createTextNode('# Restart'));
+                    append(scoreBoard,restartSpan);
+
+                    append(fragment,scoreBoard);
+
+                    append(container,fragment);
+
+                    restartSpan.addEventListener('click', event => {
+                      game.classList.add('hide');
+                      scoreBoard.classList.add('hide');
+
+                      cover.classList.remove('flip');
+                      cover.classList.add('close');
+                      coverSpan.classList.remove('disabled');
+
+                      Players.forEach( (player,i) => {
+                        player.borders = 0;
+                        player.boxs = 0;
+                        player.turn = i == 0 ? true : false;
+                      });
+
+                      setTimeout(function(){ 
+                        scoreBoard.remove();
+                        game.remove();
+                      }, 1000);
+                    });
+
+                    watchBoxes();
+                    cover.classList.remove('close');
+                    cover.classList.add('flip');
+
+                    showDivsAnimation();
+                    hoverBorders();
+
+                });
+
+            }
+
+            buildGame();
+
+        })();
+    </script>
 </body>
 </html>
