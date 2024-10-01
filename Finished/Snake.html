@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Customizable Snake Game</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customizable Snake Game</title>
   <style>
     html, body {
       height: 100%;
@@ -31,8 +31,9 @@
       border: 2px solid white;
     }
 
-    input {
+    input, select {
       margin: 10px;
+      color: black;
     }
 
     button {
@@ -59,6 +60,10 @@
       margin-top: 10px;
       font-size: 18px;
     }
+
+    label {
+      margin: 5px;
+    }
   </style>
 </head>
 <body>
@@ -71,6 +76,12 @@
   
   <label for="speed">Snake Speed (1 - 10):</label>
   <input type="number" id="speed" value="5" min="1" max="10">
+  
+  <label for="showGrid">Show Grid</label>
+  <input type="checkbox" id="showGrid">
+  
+  <label for="sound">Enable Sound</label>
+  <input type="checkbox" id="sound">
   
   <button onclick="startGame()">Start Game</button>
   
@@ -85,6 +96,7 @@
 <canvas id="game" style="display: none;"></canvas>
 
 <script>
+// Mobile adjustments and touch
 var canvas = document.getElementById('game');
 var context = canvas.getContext('2d');
 var scoreElement = document.getElementById('score');
@@ -100,6 +112,18 @@ var gameInterval;
 
 // Snake and apple objects
 var snake, apple;
+
+// Prevents default touch action (scrolling, page reloads, etc.)
+window.addEventListener('touchmove', function(e) {
+  e.preventDefault();
+}, { passive: false });
+
+window.onload = function() {
+  // Prevent scrolling behavior on mobile when swiping down
+  document.body.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+  }, { passive: false });
+};
 
 // Initialize the snake, apple, and game properties
 function initGame(boardSize) {
@@ -131,16 +155,18 @@ function startGame() {
   var boardSize = parseInt(document.getElementById('boardSize').value);
   var speedInput = parseInt(document.getElementById('speed').value);
   
-  snakeSpeed = 11 - speedInput;
-  grid = 400 / boardSize;
+  snakeSpeed = 11 - speedInput; // Lower number = faster speed
+  grid = 400 / boardSize; // Adjust grid size based on the board
   
   initGame(boardSize);
   
+  // Hide the menu and show the canvas
   document.getElementById('menu').style.display = 'none';
   canvas.style.display = 'block';
   scoreElement.style.display = 'block';
   
-  clearInterval(gameInterval);
+  // Start the game loop
+  clearInterval(gameInterval); // Clear any previous interval
   gameInterval = setInterval(loop, snakeSpeed * 10);
 }
 
@@ -156,7 +182,7 @@ function getRandomSnakeColor() {
   return snakeColors[Math.floor(Math.random() * snakeColors.length)];
 }
 
-// Get random integer between min and max
+// Get random integer between a min and max value
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -175,9 +201,11 @@ function loop() {
   
   context.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Move the snake by its velocity
   snake.x += snake.dx;
   snake.y += snake.dy;
 
+  // Wrap the snake on screen edges
   if (snake.x < 0) {
     snake.x = canvas.width - grid;
   } else if (snake.x >= canvas.width) {
@@ -190,8 +218,10 @@ function loop() {
     snake.y = 0;
   }
 
+  // Keep track of snake positions
   snake.cells.unshift({x: snake.x, y: snake.y});
 
+  // Remove excess snake cells
   if (snake.cells.length > snake.maxCells) {
     snake.cells.pop();
   }
@@ -200,95 +230,45 @@ function loop() {
   context.fillStyle = apple.color;
   context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
 
-  // Draw the snake head
-  context.fillStyle = 'yellow'; // Snake head in yellow
-  context.fillRect(snake.cells[0].x, snake.cells[0].y, grid - 1, grid - 1);
+  // Draw the snake (head is yellow, tail is darker)
+  snake.cells.forEach(function(cell, index) {
+    context.fillStyle = (index === 0) ? 'yellow' : (index === snake.cells.length - 1) ? 'darkgreen' : snakeColor;
+    context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
 
-  // Draw the rest of the snake
-  context.fillStyle = snakeColor;
-  for (let i = 1; i < snake.cells.length; i++) {
-    if (i === snake.cells.length - 1) {
-      context.fillStyle = 'darkgreen'; // Snake tail in dark green
+    // Check for snake eating the apple
+    if (cell.x === apple.x && cell.y === apple.y) {
+      snake.maxCells++;
+      score++; // Increase the score
+      updateScore(); // Update the score display
+      apple.x = getRandomInt(0, canvas.width / grid) * grid;
+      apple.y = getRandomInt(0, canvas.height / grid) * grid;
+      apple.color = getRandomAppleColor(); // Change apple color
     }
-    context.fillRect(snake.cells[i].x, snake.cells[i].y, grid - 1, grid - 1);
-  }
 
-  // Snake eating the apple
-  if (snake.cells[0].x === apple.x && snake.cells[0].y === apple.y) {
-    snake.maxCells++;
-    score++;
-    updateScore();
-    apple.x = getRandomInt(0, canvas.width / grid) * grid;
-    apple.y = getRandomInt(0, canvas.height / grid) * grid;
-    apple.color = getRandomAppleColor();
-  }
-
-  // Snake collision with itself
-  for (let i = 1; i < snake.cells.length; i++) {
-    if (snake.cells[0].x === snake.cells[i].x && snake.cells[0].y === snake.cells[i].y) {
-      clearInterval(gameInterval);
-      endGame();
-      return;
+    // Check for collision with itself
+    for (var i = index + 1; i < snake.cells.length; i++) {
+      if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+        // End game if snake collides with itself
+        clearInterval(gameInterval);
+        endGame();
+        return;
+      }
     }
-  }
+  });
 }
 
-// End the game
+// End the game, show the menu, and display the final score
 function endGame() {
+  // Display final score on the menu
   finalScoreElement.innerHTML = 'Final Score: ' + score;
+  
+  // Hide the game canvas and show the menu
   canvas.style.display = 'none';
   document.getElementById('menu').style.display = 'flex';
   scoreElement.style.display = 'none';
 }
 
-// Prevent page reload on swipe
-document.addEventListener('touchstart', function(e) {
-  e.preventDefault();
-}, {passive: false});
-
-// Swipe controls
-let touchStartX = 0;
-let touchStartY = 0;
-
-canvas.addEventListener('touchstart', function(e) {
-  const touch = e.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
-});
-
-canvas.addEventListener('touchmove', function(e) {
-  e.preventDefault(); // Prevent default scroll behavior
-  if (!touchStartX || !touchStartY) return;
-
-  let touchEndX = e.touches[0].clientX;
-  let touchEndY = e.touches[0].clientY;
-
-  let diffX = touchEndX - touchStartX;
-  let diffY = touchEndY - touchStartY;
-
-  if (Math.abs(diffX) > Math.abs(diffY)) {
-    if (diffX > 0 && snake.dx === 0) {
-      snake.dx = grid;
-      snake.dy = 0;
-    } else if (diffX < 0 && snake.dx === 0) {
-      snake.dx = -grid;
-      snake.dy = 0;
-    }
-  } else {
-    if (diffY > 0 && snake.dy === 0) {
-      snake.dy = grid;
-      snake.dx = 0;
-    } else if (diffY < 0 && snake.dy === 0) {
-      snake.dy = -grid;
-      snake.dx = 0;
-    }
-  }
-
-  touchStartX = 0;
-  touchStartY = 0;
-});
-
-// WASD and arrow key inputs
+// Listen to keyboard events for snake movement (also supports WASD)
 document.addEventListener('keydown', function(e) {
   if ((e.key === 'ArrowLeft' || e.key === 'a') && snake.dx === 0) {
     snake.dx = -grid;
@@ -305,10 +285,56 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Prevent scrolling on swipe down/up
-window.addEventListener('touchmove', function(e) {
-  e.preventDefault();
-}, { passive: false });
+// Mobile swipe controls for snake movement
+let touchStartX = null;
+let touchStartY = null;
+
+document.addEventListener('touchstart', function(e) {
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+});
+
+document.addEventListener('touchmove', function(e) {
+  if (!touchStartX || !touchStartY) return;
+
+  const touch = e.touches[0];
+  const touchEndX = touch.clientX;
+  const touchEndY = touch.clientY;
+
+  const diffX = touchEndX - touchStartX;
+  const diffY = touchEndY - touchStartY;
+
+  // Determine the direction of the swipe
+  if (Math.abs(diffX) > Math.abs(diffY)) {
+    // Horizontal swipe
+    if (diffX > 0 && snake.dx === 0) {
+      // Swipe right
+      snake.dx = grid;
+      snake.dy = 0;
+    } else if (diffX < 0 && snake.dx === 0) {
+      // Swipe left
+      snake.dx = -grid;
+      snake.dy = 0;
+    }
+  } else {
+    // Vertical swipe
+    if (diffY > 0 && snake.dy === 0) {
+      // Swipe down
+      snake.dy = grid;
+      snake.dx = 0;
+    } else if (diffY < 0 && snake.dy === 0) {
+      // Swipe up
+      snake.dy = -grid;
+      snake.dx = 0;
+    }
+  }
+
+  // Reset touch positions
+  touchStartX = null;
+  touchStartY = null;
+});
 </script>
+
 </body>
 </html>
