@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Customizable Snake Game with Power-ups</title>
+  <title>Advanced Customizable Snake Game</title>
   <meta charset="UTF-8">
   <style>
     html, body {
@@ -11,13 +11,14 @@
       align-items: center;
       justify-content: center;
       background: #1a1a1a; /* Darker gray for background */
-      color: white; /* Make text white for visibility */
+      color: white; /* White text for visibility */
       font-family: Arial, sans-serif;
     }
 
     canvas {
       border: 1px solid white;
       background-color: #4d4d4d; /* Lighter gray for board */
+      display: none; /* Hidden initially */
     }
 
     #menu {
@@ -25,24 +26,37 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.85);
+      padding: 30px;
       border: 2px solid white;
+      border-radius: 10px;
       color: white; /* White text */
+      z-index: 1;
     }
 
-    input {
-      margin: 10px;
+    #menu label {
+      margin-top: 15px;
+    }
+
+    #menu input[type="number"] {
+      margin-left: 10px;
       padding: 5px;
-      width: 80px;
+      width: 60px;
+    }
+
+    #menu input[type="checkbox"] {
+      margin-right: 10px;
     }
 
     button {
-      padding: 10px;
+      margin-top: 20px;
+      padding: 10px 20px;
       background-color: white;
       color: black;
       cursor: pointer;
       border: none;
+      border-radius: 5px;
+      font-size: 16px;
     }
 
     button:hover {
@@ -53,267 +67,424 @@
       position: absolute;
       top: 20px;
       right: 20px;
-      font-size: 20px;
+      font-size: 24px;
       color: white;
+      display: none;
     }
 
     #finalScore {
-      margin-top: 10px;
+      margin-top: 20px;
       font-size: 18px;
+      color: yellow;
     }
   </style>
 </head>
 <body>
 
-<!-- Start menu -->
-<div id="menu">
-  <h2>Snake Game</h2>
+  <!-- Start Menu -->
+  <div id="menu">
+    <h2>Snake Game</h2>
+    
+    <!-- Board Size -->
+    <label for="boardSize">
+      Board Size (10 - 50):
+      <input type="number" id="boardSize" value="25" min="10" max="50">
+    </label>
+    
+    <!-- Snake Speed -->
+    <label for="speed">
+      Snake Speed (1 - 10):
+      <input type="number" id="speed" value="5" min="1" max="10">
+    </label>
+    
+    <!-- Multiple Apples -->
+    <label>
+      <input type="checkbox" id="multipleApplesToggle"> Enable Multiple Apples
+      <input type="number" id="appleCount" value="1" min="1" max="10" disabled>
+    </label>
+    
+    <!-- Obstacles -->
+    <label>
+      <input type="checkbox" id="obstacleToggle"> Enable Obstacles
+      <input type="number" id="obstacleInterval" value="10" min="1" max="100" disabled> (Spawn every X seconds)
+    </label>
+    
+    <!-- Power-ups -->
+    <label>
+      <input type="checkbox" id="powerToggle"> Enable Power-ups
+      <input type="number" id="powerInterval" value="15" min="1" max="100" disabled> (Spawn every X seconds)
+    </label>
+    
+    <button onclick="startGame()">Start Game</button>
+    
+    <!-- Final Score Display -->
+    <div id="finalScore"></div>
+  </div>
   
-  <label for="boardSize">Board Size (10 - 50):</label>
-  <input type="number" id="boardSize" value="25" min="10" max="50">
+  <!-- Score Display -->
+  <div id="score">Score: 0</div>
   
-  <label for="speed">Snake Speed (1 - 10):</label>
-  <input type="number" id="speed" value="5" min="1" max="10">
+  <!-- Game Canvas -->
+  <canvas id="game"></canvas>
   
-  <br>
-  
-  <!-- Multiple Apples Option -->
-  <label>
-    <input type="checkbox" id="multipleApplesToggle"> Enable Multiple Apples
-  </label>
-  <input type="number" id="appleCount" value="1" min="1" max="10" disabled>
-  
-  <!-- Obstacle Option -->
-  <label>
-    <input type="checkbox" id="obstacleToggle"> Enable Obstacles
-  </label>
-  <input type="number" id="obstacleInterval" value="10" min="1" max="100" disabled>
-  
-  <!-- Power-ups Option -->
-  <label>
-    <input type="checkbox" id="powerToggle"> Enable Power-ups
-  </label>
-  <input type="number" id="powerInterval" value="10" min="1" max="100" disabled>
-  
-  <button onclick="startGame()">Start Game</button>
-  
-  <!-- Final Score Display -->
-  <div id="finalScore"></div>
-</div>
+  <script>
+    const canvas = document.getElementById('game');
+    const context = canvas.getContext('2d');
+    const menu = document.getElementById('menu');
+    const scoreElement = document.getElementById('score');
+    const finalScoreElement = document.getElementById('finalScore');
 
-<!-- Score display -->
-<div id="score" style="display:none;">Score: 0</div>
+    // Game Variables
+    let grid = 16;
+    let count = 0;
+    let snakeSpeed = 5; // 1 (slowest) to 10 (fastest)
+    let snakeColor = '';
+    let score = 0;
+    let gameInterval;
+    let obstacleIntervalId;
+    let powerIntervalId;
+    let isGameRunning = false;
 
-<!-- Game canvas -->
-<canvas id="game" style="display: none;"></canvas>
+    // Snake and Game Objects
+    let snake, apples = [], obstacles = [], powers = [];
 
-<script>
-var canvas = document.getElementById('game');
-var context = canvas.getContext('2d');
-var scoreElement = document.getElementById('score');
-var finalScoreElement = document.getElementById('finalScore');
+    // Power-up Types
+    const POWER_TYPES = {
+      SPEED_UP: 0,
+      SPEED_DOWN: 1,
+      SCORE_UP: 2
+    };
 
-// Variables for grid, speed, and game loop control
-var grid = 16;
-var count = 0;
-var snakeSpeed = 5;
-var snakeColor = '';
-var score = 0;
-var gameInterval;
-var isGameRunning = false;
-var appleCount = 1;
-var apples = [];
-var obstacles = [];
-var powers = [];
-
-// Snake and apple objects
-var snake, apple, obstacles, powers;
-
-// Initialize the snake, apple, and game properties
-function initGame(boardSize, appleCount) {
-  canvas.width = boardSize * grid;
-  canvas.height = boardSize * grid;
-  
-  snake = {
-    x: 160,
-    y: 160,
-    dx: grid,
-    dy: 0,
-    cells: [],
-    maxCells: 4
-  };
-  
-  apples = [];
-  for (let i = 0; i < appleCount; i++) {
-    apples.push({
-      x: getRandomInt(0, boardSize) * grid,
-      y: getRandomInt(0, boardSize) * grid,
-      color: getRandomAppleColor()
-    });
-  }
-
-  obstacles = [];
-  powers = [];
-
-  snakeColor = getRandomSnakeColor();
-  score = 0;
-  updateScore();
-}
-
-// Start the game
-function startGame() {
-  if (isGameRunning) return; // Prevent starting multiple instances
-  
-  var boardSize = parseInt(document.getElementById('boardSize').value);
-  var speedInput = parseInt(document.getElementById('speed').value);
-  var multipleApplesToggle = document.getElementById('multipleApplesToggle').checked;
-  appleCount = multipleApplesToggle ? parseInt(document.getElementById('appleCount').value) : 1;
-  
-  snakeSpeed = 11 - speedInput; // Lower number = faster speed
-  grid = 400 / boardSize; // Adjust grid size based on the board size
-  
-  initGame(boardSize, appleCount);
-  
-  // Hide the menu and show the canvas
-  document.getElementById('menu').style.display = 'none';
-  canvas.style.display = 'block';
-  scoreElement.style.display = 'block';
-  
-  // Start the game loop
-  clearInterval(gameInterval); // Clear any previous interval
-  gameInterval = setInterval(loop, snakeSpeed * 10);
-  isGameRunning = true;
-}
-
-// Get a random color for the apple
-function getRandomAppleColor() {
-  const appleColors = ['red', 'orange'];
-  return appleColors[Math.floor(Math.random() * appleColors.length)];
-}
-
-// Get a random color for the snake (set once at start)
-function getRandomSnakeColor() {
-  const snakeColors = ['teal', 'cyan'];
-  return snakeColors[Math.floor(Math.random() * snakeColors.length)];
-}
-
-// Get random integer between a min and max value
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min)) + min;
-}
-
-// Update score display
-function updateScore() {
-  scoreElement.innerHTML = 'Score: ' + score;
-}
-
-// Main game loop
-function loop() {
-  if (++count < 4) {
-    return;
-  }
-  count = 0;
-  
-  context.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Move the snake by its velocity
-  snake.x += snake.dx;
-  snake.y += snake.dy;
-
-  // Wrap the snake on screen edges
-  if (snake.x < 0) {
-    snake.x = canvas.width - grid;
-  } else if (snake.x >= canvas.width) {
-    snake.x = 0;
-  }
-
-  if (snake.y < 0) {
-    snake.y = canvas.height - grid;
-  } else if (snake.y >= canvas.height) {
-    snake.y = 0;
-  }
-
-  // Keep track of snake positions
-  snake.cells.unshift({x: snake.x, y: snake.y});
-
-  // Remove excess snake cells
-  if (snake.cells.length > snake.maxCells) {
-    snake.cells.pop();
-  }
-
-  // Draw multiple apples
-  apples.forEach(function(apple) {
-    context.fillStyle = apple.color;
-    context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
-  });
-
-  // Draw the snake
-  context.fillStyle = snakeColor;
-  snake.cells.forEach(function(cell, index) {
-    context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
-
-    // Check for snake eating any apple
-    apples.forEach(function(apple, appleIndex) {
-      if (cell.x === apple.x && cell.y === apple.y) {
-        snake.maxCells++;
-        score++; // Increase the score
-        updateScore(); // Update the score display
-        // Move the eaten apple to a new location
-        apple.x = getRandomInt(0, canvas.width / grid) * grid;
-        apple.y = getRandomInt(0, canvas.height / grid) * grid;
+    // Initialize the game based on user settings
+    function initGame(boardSize, appleCount) {
+      // Set canvas size
+      canvas.width = boardSize * grid;
+      canvas.height = boardSize * grid;
+      
+      // Initialize snake in the center
+      snake = {
+        x: Math.floor(boardSize / 2) * grid,
+        y: Math.floor(boardSize / 2) * grid,
+        dx: grid, // Initially moving right
+        dy: 0,
+        cells: [],
+        maxCells: 4
+      };
+      
+      // Initialize apples
+      apples = [];
+      for (let i = 0; i < appleCount; i++) {
+        spawnApple();
       }
-    });
+      
+      // Initialize obstacles and powers
+      obstacles = [];
+      powers = [];
+      
+      // Choose snake color once
+      snakeColor = getRandomSnakeColor();
+      
+      // Reset score
+      score = 0;
+      updateScore();
+    }
 
-    // Check for collision with itself
-    for (var i = index + 1; i < snake.cells.length; i++) {
-      if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-        // End game if snake collides with itself
-        clearInterval(gameInterval);
-        isGameRunning = false;
-        endGame();
+    // Start the game
+    function startGame() {
+      if (isGameRunning) return; // Prevent multiple game instances
+
+      // Get user inputs
+      const boardSize = parseInt(document.getElementById('boardSize').value);
+      const speedInput = parseInt(document.getElementById('speed').value);
+      const multipleApplesToggle = document.getElementById('multipleApplesToggle').checked;
+      const appleCount = multipleApplesToggle ? parseInt(document.getElementById('appleCount').value) : 1;
+      const obstacleToggle = document.getElementById('obstacleToggle').checked;
+      const obstacleInterval = parseInt(document.getElementById('obstacleInterval').value) * 1000; // Convert to ms
+      const powerToggle = document.getElementById('powerToggle').checked;
+      const powerInterval = parseInt(document.getElementById('powerInterval').value) * 1000; // Convert to ms
+      
+      // Set snake speed (inverse relationship: higher input = faster snake)
+      snakeSpeed = 11 - speedInput; // Range: 1 (fastest) to 10 (slowest)
+      
+      // Adjust grid size based on board size (assuming canvas size remains 400x400)
+      grid = Math.floor(400 / boardSize);
+      if (400 % boardSize !== 0) {
+        alert('Board size must evenly divide 400 for proper grid alignment.');
         return;
       }
+
+      // Initialize game objects
+      initGame(boardSize, appleCount);
+      
+      // Hide menu and show game canvas
+      menu.style.display = 'none';
+      canvas.style.display = 'block';
+      scoreElement.style.display = 'block';
+      
+      // Start the game loop
+      gameInterval = setInterval(loop, snakeSpeed * 100); // Adjust timing based on speed
+      
+      // Set up obstacle spawning if enabled
+      if (obstacleToggle) {
+        obstacleIntervalId = setInterval(spawnObstacle, obstacleInterval);
+      }
+      
+      // Set up power-up spawning if enabled
+      if (powerToggle) {
+        powerIntervalId = setInterval(spawnPower, powerInterval);
+      }
+      
+      isGameRunning = true;
     }
-  });
-}
 
-// End the game, show the menu, and display the final score
-function endGame() {
-  finalScoreElement.innerHTML = 'Final Score: ' + score;
-  canvas.style.display = 'none';
-  document.getElementById('menu').style.display = 'flex';
-  scoreElement.style.display = 'none';
-}
+    // Spawn an apple at a random location not occupied by snake, obstacles, or other apples
+    function spawnApple() {
+      let newApple;
+      do {
+        newApple = {
+          x: getRandomInt(0, canvas.width / grid) * grid,
+          y: getRandomInt(0, canvas.height / grid) * grid,
+          color: getRandomAppleColor()
+        };
+      } while (isOccupied(newApple.x, newApple.y));
+      apples.push(newApple);
+    }
 
-// Listen to keyboard events for snake movement
-document.addEventListener('keydown', function(e) {
-  if (e.which === 37 && snake.dx === 0) {
-    snake.dx = -grid;
-    snake.dy = 0;
-  } else if (e.which === 38 && snake.dy === 0) {
-    snake.dy = -grid;
-    snake.dx = 0;
-  } else if (e.which === 39 && snake.dx === 0) {
-    snake.dx = grid;
-    snake.dy = 0;
-  } else if (e.which === 40 && snake.dy === 0) {
-    snake.dy = grid;
-    snake.dx = 0;
-  }
-});
+    // Spawn an obstacle at a random location not occupied by snake, apples, or other obstacles
+    function spawnObstacle() {
+      let newObstacle;
+      do {
+        newObstacle = {
+          x: getRandomInt(0, canvas.width / grid) * grid,
+          y: getRandomInt(0, canvas.height / grid) * grid,
+          color: 'black'
+        };
+      } while (isOccupied(newObstacle.x, newObstacle.y));
+      obstacles.push(newObstacle);
+    }
 
-// Enable or disable input fields based on checkbox state
-document.getElementById('multipleApplesToggle').addEventListener('change', function() {
-  document.getElementById('appleCount').disabled = !this.checked;
-});
+    // Spawn a power-up at a random location not occupied by snake, apples, obstacles, or other power-ups
+    function spawnPower() {
+      let newPower;
+      do {
+        newPower = {
+          x: getRandomInt(0, canvas.width / grid) * grid,
+          y: getRandomInt(0, canvas.height / grid) * grid,
+          color: 'magenta',
+          type: getRandomPowerType()
+        };
+      } while (isOccupied(newPower.x, newPower.y));
+      powers.push(newPower);
+    }
 
-document.getElementById('obstacleToggle').addEventListener('change', function() {
-  document.getElementById('obstacleInterval').disabled = !this.checked;
-});
+    // Check if a position is occupied by snake, apples, obstacles, or power-ups
+    function isOccupied(x, y) {
+      // Check snake
+      for (let cell of snake.cells) {
+        if (cell.x === x && cell.y === y) return true;
+      }
+      // Check apples
+      for (let apple of apples) {
+        if (apple.x === x && apple.y === y) return true;
+      }
+      // Check obstacles
+      for (let obstacle of obstacles) {
+        if (obstacle.x === x && obstacle.y === y) return true;
+      }
+      // Check power-ups
+      for (let power of powers) {
+        if (power.x === x && power.y === y) return true;
+      }
+      return false;
+    }
 
-document.getElementById('powerToggle').addEventListener('change', function() {
-  document.getElementById('powerInterval').disabled = !this.checked;
-});
-</script>
+    // Get random power-up type
+    function getRandomPowerType() {
+      const types = [POWER_TYPES.SPEED_UP, POWER_TYPES.SPEED_DOWN, POWER_TYPES.SCORE_UP];
+      return types[Math.floor(Math.random() * types.length)];
+    }
+
+    // Get random color for the apple
+    function getRandomAppleColor() {
+      const appleColors = ['red', 'orange'];
+      return appleColors[Math.floor(Math.random() * appleColors.length)];
+    }
+
+    // Get random color for the snake (teal or cyan)
+    function getRandomSnakeColor() {
+      const snakeColors = ['teal', 'cyan'];
+      return snakeColors[Math.floor(Math.random() * snakeColors.length)];
+    }
+
+    // Get a random integer between min (inclusive) and max (exclusive)
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    // Update the score display
+    function updateScore() {
+      scoreElement.innerHTML = 'Score: ' + score;
+    }
+
+    // Main Game Loop
+    function loop() {
+      if (++count < 1) { // Adjust to control game speed
+        return;
+      }
+      count = 0;
+      
+      // Clear the canvas
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Move the snake
+      snake.x += snake.dx;
+      snake.y += snake.dy;
+      
+      // Wrap the snake around the edges
+      if (snake.x < 0) {
+        snake.x = canvas.width - grid;
+      } else if (snake.x >= canvas.width) {
+        snake.x = 0;
+      }
+
+      if (snake.y < 0) {
+        snake.y = canvas.height - grid;
+      } else if (snake.y >= canvas.height) {
+        snake.y = 0;
+      }
+      
+      // Add new head to the snake
+      snake.cells.unshift({x: snake.x, y: snake.y});
+      
+      // Remove excess cells
+      if (snake.cells.length > snake.maxCells) {
+        snake.cells.pop();
+      }
+      
+      // Draw obstacles
+      obstacles.forEach(function(obstacle) {
+        context.fillStyle = obstacle.color;
+        context.fillRect(obstacle.x, obstacle.y, grid - 1, grid - 1);
+        
+        // Check collision with snake
+        if (snake.x === obstacle.x && snake.y === obstacle.y) {
+          gameOver();
+        }
+      });
+      
+      // Draw power-ups
+      powers.forEach(function(power, index) {
+        context.fillStyle = power.color;
+        context.fillRect(power.x, power.y, grid - 1, grid - 1);
+        context.fillStyle = 'white';
+        context.font = `${grid - 6}px Arial`;
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(power.type, power.x + grid / 2, power.y + grid / 2);
+        
+        // Check collision with snake
+        if (snake.x === power.x && snake.y === power.y) {
+          applyPowerUp(power.type);
+          powers.splice(index, 1); // Remove the power-up after it's eaten
+        }
+      });
+      
+      // Draw apples
+      apples.forEach(function(apple) {
+        context.fillStyle = apple.color;
+        context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
+      });
+      
+      // Draw the snake
+      context.fillStyle = snakeColor;
+      snake.cells.forEach(function(cell) {
+        context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
+        
+        // Check collision with apples
+        apples.forEach(function(apple, index) {
+          if (cell.x === apple.x && cell.y === apple.y) {
+            snake.maxCells++;
+            score++;
+            updateScore();
+            apples.splice(index, 1);
+            spawnApple();
+          }
+        });
+        
+        // Check collision with itself
+        for (let i = 1; i < snake.cells.length; i++) {
+          if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+            gameOver();
+          }
+        }
+      });
+    }
+
+    // Apply power-up effects
+    function applyPowerUp(type) {
+      switch(type) {
+        case POWER_TYPES.SPEED_UP:
+          if (snakeSpeed > 1) {
+            snakeSpeed--;
+            clearInterval(gameInterval);
+            gameInterval = setInterval(loop, snakeSpeed * 100);
+          }
+          break;
+        case POWER_TYPES.SPEED_DOWN:
+          if (snakeSpeed < 10) {
+            snakeSpeed++;
+            clearInterval(gameInterval);
+            gameInterval = setInterval(loop, snakeSpeed * 100);
+          }
+          break;
+        case POWER_TYPES.SCORE_UP:
+          score += 5; // Increase score by 5
+          updateScore();
+          break;
+      }
+    }
+
+    // Handle Game Over
+    function gameOver() {
+      clearInterval(gameInterval);
+      clearInterval(obstacleIntervalId);
+      clearInterval(powerIntervalId);
+      isGameRunning = false;
+      finalScoreElement.innerHTML = 'Final Score: ' + score;
+      canvas.style.display = 'none';
+      menu.style.display = 'flex';
+      scoreElement.style.display = 'none';
+    }
+
+    // Keyboard Controls
+    document.addEventListener('keydown', function(e) {
+      if (e.which === 37 && snake.dx === 0) { // Left arrow
+        snake.dx = -grid;
+        snake.dy = 0;
+      } else if (e.which === 38 && snake.dy === 0) { // Up arrow
+        snake.dy = -grid;
+        snake.dx = 0;
+      } else if (e.which === 39 && snake.dx === 0) { // Right arrow
+        snake.dx = grid;
+        snake.dy = 0;
+      } else if (e.which === 40 && snake.dy === 0) { // Down arrow
+        snake.dy = grid;
+        snake.dx = 0;
+      }
+    });
+
+    // Enable/Disable Input Fields Based on Checkboxes
+    document.getElementById('multipleApplesToggle').addEventListener('change', function() {
+      document.getElementById('appleCount').disabled = !this.checked;
+    });
+
+    document.getElementById('obstacleToggle').addEventListener('change', function() {
+      document.getElementById('obstacleInterval').disabled = !this.checked;
+    });
+
+    document.getElementById('powerToggle').addEventListener('change', function() {
+      document.getElementById('powerInterval').disabled = !this.checked;
+    });
+  </script>
 </body>
 </html>
