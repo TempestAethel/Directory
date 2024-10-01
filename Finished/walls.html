@@ -200,41 +200,23 @@
         }
 
         // Download the animation as a GIF
-       function downloadGif() {
-    const gif = new GIF({
-        workers: 2,
-        quality: 10
-    });
-
-    const totalFrames = 60;  // Total frames for a few seconds of animation
-    const delayBetweenFrames = 100;  // Delay in milliseconds (100ms per frame)
-    let frameIndex = 0;
-
-    // Function to capture each frame
-    function captureFrame() {
-        if (frameIndex < totalFrames) {
-            drawMatrix();  // Draw matrix animation
-            gif.addFrame(canvas, {copy: true, delay: delayBetweenFrames});  // Add canvas as a frame
-            frameIndex++;
-
-            // Capture the next frame using requestAnimationFrame
-            requestAnimationFrame(captureFrame);
-        } else {
-            gif.on('finished', function(blob) {
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'matrix_rain_animation.gif';  // Set download name
-                link.click();  // Trigger download
-            });
-
-            // Start GIF rendering after all frames are captured
-            gif.render();
+      // Create a simple GIF from the canvas (demonstration purposes)
+        function createGif() {
+            const gifDataUrl = canvas.toDataURL('image/gif');  // Convert the canvas to a GIF
+            return gifDataUrl;
         }
-    }
 
-    // Start capturing frames
-    captureFrame();
-}
+        // Download the GIF when the button is clicked
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const gifDataUrl = createGif();
+            const link = document.createElement('a');
+            link.href = gifDataUrl;
+            link.download = 'matrix_rain_animation.gif';  // Specify the name for the downloaded file
+            document.body.appendChild(link);
+            link.click();  // Trigger download
+            document.body.removeChild(link);  // Clean up
+        });
+        
     </script>
 </body>
 </html>
