@@ -10,13 +10,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: black;
+      background: #1a1a1a; /* Darker gray for background */
       color: white; /* Make text white for visibility */
+      font-family: Arial, sans-serif;
     }
 
     canvas {
       border: 1px solid white;
-      background-color: gray;
+      background-color: #4d4d4d; /* Lighter gray for board */
     }
 
     #menu {
@@ -44,6 +45,14 @@
     button:hover {
       background-color: gray;
     }
+
+    #score {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 20px;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -60,20 +69,29 @@
   <button onclick="startGame()">Start Game</button>
 </div>
 
+<!-- Score display -->
+<div id="score" style="display:none;">Score: 0</div>
+
 <!-- Game canvas -->
 <canvas id="game" style="display: none;"></canvas>
 
 <script>
 var canvas = document.getElementById('game');
 var context = canvas.getContext('2d');
+var scoreElement = document.getElementById('score');
 
 // Variables for grid, speed, and game loop control
 var grid = 16;
 var count = 0;
 var snakeSpeed = 5;
-var snake, apple, gameInterval;
+var snakeColor = '';
+var score = 0;
+var gameInterval;
 
-// Initialize snake and apple objects
+// Snake and apple objects
+var snake, apple;
+
+// Initialize the snake, apple, and game properties
 function initGame(boardSize) {
   canvas.width = boardSize * grid;
   canvas.height = boardSize * grid;
@@ -92,9 +110,13 @@ function initGame(boardSize) {
     y: getRandomInt(0, boardSize) * grid,
     color: getRandomAppleColor()
   };
+  
+  snakeColor = getRandomSnakeColor();
+  score = 0;
+  updateScore();
 }
 
-// Start game from the menu
+// Start the game
 function startGame() {
   var boardSize = parseInt(document.getElementById('boardSize').value);
   var speedInput = parseInt(document.getElementById('speed').value);
@@ -102,14 +124,15 @@ function startGame() {
   snakeSpeed = 11 - speedInput; // Lower number = faster speed
   grid = 400 / boardSize; // Adjust grid size based on the board
   
-  // Initialize the game with the given board size
   initGame(boardSize);
   
   // Hide the menu and show the canvas
   document.getElementById('menu').style.display = 'none';
   canvas.style.display = 'block';
+  scoreElement.style.display = 'block';
   
   // Start the game loop
+  clearInterval(gameInterval); // Clear any previous interval
   gameInterval = setInterval(loop, snakeSpeed * 10);
 }
 
@@ -119,7 +142,7 @@ function getRandomAppleColor() {
   return appleColors[Math.floor(Math.random() * appleColors.length)];
 }
 
-// Get a random color for the snake
+// Get a random color for the snake (set once at start)
 function getRandomSnakeColor() {
   const snakeColors = ['teal', 'cyan'];
   return snakeColors[Math.floor(Math.random() * snakeColors.length)];
@@ -128,6 +151,11 @@ function getRandomSnakeColor() {
 // Get random integer between a min and max value
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
+}
+
+// Update score display
+function updateScore() {
+  scoreElement.innerHTML = 'Score: ' + score;
 }
 
 // Main game loop
@@ -169,13 +197,15 @@ function loop() {
   context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
 
   // Draw the snake
-  context.fillStyle = getRandomSnakeColor();
+  context.fillStyle = snakeColor;
   snake.cells.forEach(function(cell, index) {
     context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
 
     // Check for snake eating the apple
     if (cell.x === apple.x && cell.y === apple.y) {
       snake.maxCells++;
+      score++; // Increase the score
+      updateScore(); // Update the score display
       apple.x = getRandomInt(0, canvas.width / grid) * grid;
       apple.y = getRandomInt(0, canvas.height / grid) * grid;
       apple.color = getRandomAppleColor(); // Change apple color
@@ -186,7 +216,8 @@ function loop() {
       if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
         // Reset the game if snake collides with itself
         clearInterval(gameInterval);
-        alert("Game Over! Reload to play again.");
+        alert("Game Over! Your score was " + score + ". Starting a new game...");
+        startGame(); // Automatically restart the game
         return;
       }
     }
