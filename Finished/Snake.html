@@ -11,12 +11,12 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            background-color: black;
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
         }
 
         canvas {
-            background-color: #000;
+            background-color: gray;
             border: 1px solid #333;
         }
 
@@ -54,19 +54,25 @@
         let tileCount, tileSize, snake, apples, direction, gameInterval;
         let speed = 100;  // Delay in ms for each game tick
 
+        // Colors
+        const snakeColors = ['teal', 'cyan'];
+        const appleColors = ['red', 'orange'];
+
         function startGame() {
             clearInterval(gameInterval);
 
-            let boardSize = document.getElementById('boardSize').value;
-            let appleCount = document.getElementById('appleCount').value;
+            let boardSize = parseInt(document.getElementById('boardSize').value);
+            let appleCount = parseInt(document.getElementById('appleCount').value);
 
             tileCount = boardSize;
             tileSize = canvas.width / tileCount;
 
-            snake = [{ x: tileCount / 2, y: tileCount / 2 }];
-            direction = { x: 0, y: 0 };
+            // Initialize snake in the center of the board
+            snake = [{ x: Math.floor(tileCount / 2), y: Math.floor(tileCount / 2) }];
+            direction = { x: 0, y: 0 };  // Initially not moving
             apples = [];
 
+            // Spawn apples
             for (let i = 0; i < appleCount; i++) {
                 spawnApple();
             }
@@ -82,7 +88,11 @@
                 appleY = Math.floor(Math.random() * tileCount);
             } while (snake.some(segment => segment.x === appleX && segment.y === appleY));
 
-            apples.push({ x: appleX, y: appleY });
+            apples.push({
+                x: appleX,
+                y: appleY,
+                color: appleColors[Math.floor(Math.random() * appleColors.length)]
+            });
         }
 
         function gameLoop() {
@@ -106,7 +116,7 @@
                 apples.splice(appleIndex, 1);
                 spawnApple();
             } else {
-                snake.pop(); // Remove tail if no apple is eaten
+                snake.pop();  // Remove tail if no apple is eaten
             }
 
             // Draw everything
@@ -117,14 +127,14 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Draw snake
-            ctx.fillStyle = 'green';
+            ctx.fillStyle = snakeColors[Math.floor(Math.random() * snakeColors.length)];
             snake.forEach(segment => {
                 ctx.fillRect(segment.x * tileSize, segment.y * tileSize, tileSize, tileSize);
             });
 
             // Draw apples
-            ctx.fillStyle = 'red';
             apples.forEach(apple => {
+                ctx.fillStyle = apple.color;
                 ctx.fillRect(apple.x * tileSize, apple.y * tileSize, tileSize, tileSize);
             });
         }
