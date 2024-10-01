@@ -53,6 +53,11 @@
       font-size: 20px;
       color: white;
     }
+
+    #finalScore {
+      margin-top: 10px;
+      font-size: 18px;
+    }
   </style>
 </head>
 <body>
@@ -67,6 +72,9 @@
   <input type="number" id="speed" value="5" min="1" max="10">
   
   <button onclick="startGame()">Start Game</button>
+  
+  <!-- Final Score Display -->
+  <div id="finalScore"></div>
 </div>
 
 <!-- Score display -->
@@ -79,6 +87,7 @@
 var canvas = document.getElementById('game');
 var context = canvas.getContext('2d');
 var scoreElement = document.getElementById('score');
+var finalScoreElement = document.getElementById('finalScore');
 
 // Variables for grid, speed, and game loop control
 var grid = 16;
@@ -214,14 +223,24 @@ function loop() {
     // Check for collision with itself
     for (var i = index + 1; i < snake.cells.length; i++) {
       if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-        // Reset the game if snake collides with itself
+        // End game if snake collides with itself
         clearInterval(gameInterval);
-        alert("Game Over! Your score was " + score + ". Starting a new game...");
-        startGame(); // Automatically restart the game
+        endGame();
         return;
       }
     }
   });
+}
+
+// End the game, show the menu, and display the final score
+function endGame() {
+  // Display final score on the menu
+  finalScoreElement.innerHTML = 'Final Score: ' + score;
+  
+  // Hide the game canvas and show the menu
+  canvas.style.display = 'none';
+  document.getElementById('menu').style.display = 'flex';
+  scoreElement.style.display = 'none';
 }
 
 // Listen to keyboard events for snake movement
