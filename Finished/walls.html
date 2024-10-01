@@ -305,14 +305,21 @@
         }
     }
 
+    let intervalId;
+
     // Function to continuously update the matrix with adjustable speed
-    function updateMatrix() {
-        drawMatrix();
+    function startMatrixRain() {
         const rainSpeed = document.getElementById('rainSpeed').value; // Get rain speed value
-        setTimeout(updateMatrix, rainSpeed);  // Set the update interval to user-defined speed
+
+        // Clear any existing interval before setting a new one
+        clearInterval(intervalId);
+
+        // Set a new interval with the user-defined speed
+        intervalId = setInterval(drawMatrix, rainSpeed);
     }
 
-    updateMatrix();
+    // Start the matrix rain initially
+    startMatrixRain();
 
     // Event listener for window resize to adjust the canvas size dynamically
     window.addEventListener('resize', function() {
@@ -327,8 +334,7 @@
 
     // Event listener for rain speed change to adjust speed in real-time
     document.getElementById('rainSpeed').addEventListener('input', function() {
-        clearTimeout();  // Reset timeout when speed is changed
-        updateMatrix();  // Reinitialize the matrix with the new speed
+        startMatrixRain();  // Restart the rain with the new speed
     });
 
     // Function to download the canvas as an animated GIF
@@ -357,6 +363,7 @@
         gif.render();
     }
 </script>
+
     
 </body>
 </html>
