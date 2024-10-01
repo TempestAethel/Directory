@@ -199,33 +199,40 @@
         }
 
         // Download the animation as a GIF
-        function downloadGif() {
+       function downloadGif() {
     const gif = new GIF({
         workers: 2,
         quality: 10
     });
 
-    let frameCount = 60;  // Total frames to capture
+    const totalFrames = 60;  // Total frames for a few seconds of animation
+    const delayBetweenFrames = 100;  // Delay in milliseconds (100ms per frame)
     let frameIndex = 0;
 
+    // Function to capture each frame
     function captureFrame() {
-        if (frameIndex < frameCount) {
-            drawMatrix();  // Manually draw the matrix for each frame
-            gif.addFrame(canvas, {copy: true, delay: 100});
+        if (frameIndex < totalFrames) {
+            drawMatrix();  // Draw matrix animation
+            gif.addFrame(canvas, {copy: true, delay: delayBetweenFrames});  // Add canvas as a frame
             frameIndex++;
-            requestAnimationFrame(captureFrame);  // Capture the next frame
+
+            // Capture the next frame using requestAnimationFrame
+            requestAnimationFrame(captureFrame);
         } else {
             gif.on('finished', function(blob) {
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = 'matrix_rain_animation.gif';
-                link.click();
+                link.download = 'matrix_rain_animation.gif';  // Set download name
+                link.click();  // Trigger download
             });
+
+            // Start GIF rendering after all frames are captured
             gif.render();
         }
     }
 
-    captureFrame();  // Start capturing frames
+    // Start capturing frames
+    captureFrame();
 }
     </script>
 </body>
