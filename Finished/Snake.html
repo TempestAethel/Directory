@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Customizable Snake Game</title>
+  <meta charset="UTF-8">
   <style>
     html, body {
       height: 100%;
@@ -11,14 +10,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #1a1a1a;
-      color: white;
+      background: #1a1a1a; /* Darker gray for background */
+      color: white; /* Make text white for visibility */
       font-family: Arial, sans-serif;
     }
 
     canvas {
       border: 1px solid white;
-      background-color: #4d4d4d;
+      background-color: #4d4d4d; /* Lighter gray for board */
     }
 
     #menu {
@@ -29,11 +28,13 @@
       background-color: rgba(0, 0, 0, 0.8);
       padding: 20px;
       border: 2px solid white;
+      color: white; /* White text */
     }
 
-    input, select {
+    input {
       margin: 10px;
-      color: black;
+      padding: 5px;
+      width: 80px;
     }
 
     button {
@@ -60,10 +61,6 @@
       margin-top: 10px;
       font-size: 18px;
     }
-
-    label {
-      margin: 5px;
-    }
   </style>
 </head>
 <body>
@@ -76,12 +73,6 @@
   
   <label for="speed">Snake Speed (1 - 10):</label>
   <input type="number" id="speed" value="5" min="1" max="10">
-  
-  <label for="showGrid">Show Grid</label>
-  <input type="checkbox" id="showGrid">
-  
-  <label for="sound">Enable Sound</label>
-  <input type="checkbox" id="sound">
   
   <button onclick="startGame()">Start Game</button>
   
@@ -96,7 +87,6 @@
 <canvas id="game" style="display: none;"></canvas>
 
 <script>
-// Mobile adjustments and touch
 var canvas = document.getElementById('game');
 var context = canvas.getContext('2d');
 var scoreElement = document.getElementById('score');
@@ -109,21 +99,10 @@ var snakeSpeed = 5;
 var snakeColor = '';
 var score = 0;
 var gameInterval;
+var isGameRunning = false; // Prevents starting a game when another is in progress
 
 // Snake and apple objects
 var snake, apple;
-
-// Prevents default touch action (scrolling, page reloads, etc.)
-window.addEventListener('touchmove', function(e) {
-  e.preventDefault();
-}, { passive: false });
-
-window.onload = function() {
-  // Prevent scrolling behavior on mobile when swiping down
-  document.body.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-  }, { passive: false });
-};
 
 // Initialize the snake, apple, and game properties
 function initGame(boardSize) {
@@ -152,11 +131,13 @@ function initGame(boardSize) {
 
 // Start the game
 function startGame() {
+  if (isGameRunning) return; // Prevent starting multiple instances
+  
   var boardSize = parseInt(document.getElementById('boardSize').value);
   var speedInput = parseInt(document.getElementById('speed').value);
   
   snakeSpeed = 11 - speedInput; // Lower number = faster speed
-  grid = 400 / boardSize; // Adjust grid size based on the board
+  grid = 400 / boardSize; // Adjust grid size based on the board size
   
   initGame(boardSize);
   
@@ -168,6 +149,7 @@ function startGame() {
   // Start the game loop
   clearInterval(gameInterval); // Clear any previous interval
   gameInterval = setInterval(loop, snakeSpeed * 10);
+  isGameRunning = true;
 }
 
 // Get a random color for the apple
@@ -176,7 +158,7 @@ function getRandomAppleColor() {
   return appleColors[Math.floor(Math.random() * appleColors.length)];
 }
 
-// Get a random color for the snake
+// Get a random color for the snake (set once at start)
 function getRandomSnakeColor() {
   const snakeColors = ['teal', 'cyan'];
   return snakeColors[Math.floor(Math.random() * snakeColors.length)];
@@ -230,9 +212,9 @@ function loop() {
   context.fillStyle = apple.color;
   context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
 
-  // Draw the snake (head is yellow, tail is darker)
+  // Draw the snake
+  context.fillStyle = snakeColor;
   snake.cells.forEach(function(cell, index) {
-    context.fillStyle = (index === 0) ? 'yellow' : (index === snake.cells.length - 1) ? 'darkgreen' : snakeColor;
     context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
 
     // Check for snake eating the apple
@@ -250,6 +232,7 @@ function loop() {
       if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
         // End game if snake collides with itself
         clearInterval(gameInterval);
+        isGameRunning = false;
         endGame();
         return;
       }
@@ -268,20 +251,22 @@ function endGame() {
   scoreElement.style.display = 'none';
 }
 
-// Listen to keyboard events for snake movement (also supports WASD)
+// Listen to keyboard events for snake movement
 document.addEventListener('keydown', function(e) {
-  if ((e.key === 'ArrowLeft' || e.key === 'a') && snake.dx === 0) {
+  if (e.which === 37 && snake.dx === 0) {
     snake.dx = -grid;
     snake.dy = 0;
-  } else if ((e.key === 'ArrowUp' || e.key === 'w') && snake.dy === 0) {
+  } else if (e.which === 38 && snake.dy === 0) {
     snake.dy = -grid;
     snake.dx = 0;
-  } else if ((e.key === 'ArrowRight' || e.key === 'd') && snake.dx === 0) {
+  } else if (e.which === 39 && snake.dx === 0) {
     snake.dx = grid;
     snake.dy = 0;
-  } else if ((e.key === 'ArrowDown' || e.key === 's') && snake.dy === 0) {
+  } else if (e.which === 40 && snake.dy === 0) {
     snake.dy = grid;
     snake.dx = 0;
   }
 });
-
+</script>
+</body>
+</html>
