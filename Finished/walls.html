@@ -192,30 +192,30 @@
         });
 
         // Download the canvas as an image (PNG)
-        function downloadImage() {
-            const link = document.createElement('a');
-            link.href = canvas.toDataURL('image/png');
-            link.download = 'matrix_rain_wallpaper.png';
-            link.click();
-        }
+        function downloadGif() {
+    const gif = new GIF({
+        workers: 2,
+        quality: 10,
+        width: canvas.width,
+        height: canvas.height
+    });
 
-        // Download the animation as a GIF
-      // Create a simple GIF from the canvas (demonstration purposes)
-        function createGif() {
-            const gifDataUrl = canvas.toDataURL('image/gif');  // Convert the canvas to a GIF
-            return gifDataUrl;
-        }
+    // Capture frames for the GIF
+    for (let i = 0; i < 30; i++) {  // Adjust the number of frames as needed
+        drawMatrix();  // Update the canvas
+        gif.addFrame(ctx, { copy: true, delay: 100 });  // Add each frame to the GIF
+    }
 
-        // Download the GIF when the button is clicked
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            const gifDataUrl = createGif();
-            const link = document.createElement('a');
-            link.href = gifDataUrl;
-            link.download = 'matrix_rain_animation.gif';  // Specify the name for the downloaded file
-            document.body.appendChild(link);
-            link.click();  // Trigger download
-            document.body.removeChild(link);  // Clean up
-        });
+    // Render the GIF
+    gif.on('finished', function(blob) {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'matrix_rain_animation.gif';
+        link.click();
+    });
+
+    gif.render();
+}
         
     </script>
 </body>
