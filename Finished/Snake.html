@@ -122,30 +122,44 @@
     };
 
     function initGame(boardSize, appleCount) {
-      canvas.width = boardSize * grid;
-      canvas.height = boardSize * grid;
-      
-      snake = {
+    // Set canvas size
+    canvas.width = boardSize * grid;
+    canvas.height = boardSize * grid;
+
+    // Initialize snake in the center
+    snake = {
         x: Math.floor(boardSize / 2) * grid,
         y: Math.floor(boardSize / 2) * grid,
-        dx: grid,
+        dx: grid, // Initially moving right
         dy: 0,
         cells: [],
         maxCells: 4
-      };
-      
-      apples = [];
-      for (let i = 0; i < appleCount; i++) {
+    };
+
+    // Initialize apples
+    apples = [];
+    for (let i = 0; i < appleCount; i++) {
         spawnApple();
-      }
-      
-      obstacles = [];
-      powers = [];
-      snakeColor = getRandomSnakeColor();
-      score = 0;
-      updateScore();
     }
 
+    // Initialize obstacles
+    obstacles = [];
+    if (document.getElementById('obstacleToggle').checked) {
+        for (let i = 0; i < Math.floor(boardSize / 2); i++) {
+            spawnObstacle();
+        }
+    }
+
+    // Initialize powers
+    powers = [];
+    
+    // Choose snake color once
+    snakeColor = getRandomSnakeColor();
+    
+    // Reset score
+    score = 0;
+    updateScore();
+}
     function startGame() {
       if (isGameRunning) return;
 
