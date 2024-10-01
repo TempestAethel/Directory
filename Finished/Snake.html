@@ -262,6 +262,41 @@
       return false;
     }
 
+     // Event listener for keyboard input
+  document.addEventListener('keydown', (e) => {
+    switch (e.key) {
+      case 'ArrowUp':
+      case 'w':
+        if (snake.dy === 0) {
+          snake.dx = 0;
+          snake.dy = -grid;
+        }
+        break;
+      case 'ArrowDown':
+      case 's':
+        if (snake.dy === 0) {
+          snake.dx = 0;
+          snake.dy = grid;
+        }
+        break;
+      case 'ArrowLeft':
+      case 'a':
+        if (snake.dx === 0) {
+          snake.dx = -grid;
+          snake.dy = 0;
+        }
+        break;
+      case 'ArrowRight':
+      case 'd':
+        if (snake.dx === 0) {
+          snake.dx = grid;
+          snake.dy = 0;
+        }
+        break;
+    }
+  });
+
+    
     // Get random power-up type
     function getRandomPowerType() {
       const types = [POWER_TYPES.SPEED_UP, POWER_TYPES.SPEED_DOWN, POWER_TYPES.SCORE_UP];
