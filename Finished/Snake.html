@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Customizable Snake Game</title>
+  <title>Customizable Snake Game with Power-ups</title>
   <meta charset="UTF-8">
   <style>
     html, body {
@@ -68,11 +68,32 @@
 <!-- Start menu -->
 <div id="menu">
   <h2>Snake Game</h2>
+  
   <label for="boardSize">Board Size (10 - 50):</label>
   <input type="number" id="boardSize" value="25" min="10" max="50">
   
   <label for="speed">Snake Speed (1 - 10):</label>
   <input type="number" id="speed" value="5" min="1" max="10">
+  
+  <br>
+  
+  <!-- Multiple Apples Option -->
+  <label>
+    <input type="checkbox" id="multipleApplesToggle"> Enable Multiple Apples
+  </label>
+  <input type="number" id="appleCount" value="1" min="1" max="10" disabled>
+  
+  <!-- Obstacle Option -->
+  <label>
+    <input type="checkbox" id="obstacleToggle"> Enable Obstacles
+  </label>
+  <input type="number" id="obstacleInterval" value="10" min="1" max="100" disabled>
+  
+  <!-- Power-ups Option -->
+  <label>
+    <input type="checkbox" id="powerToggle"> Enable Power-ups
+  </label>
+  <input type="number" id="powerInterval" value="10" min="1" max="100" disabled>
   
   <button onclick="startGame()">Start Game</button>
   
@@ -99,13 +120,17 @@ var snakeSpeed = 5;
 var snakeColor = '';
 var score = 0;
 var gameInterval;
-var isGameRunning = false; // Prevents starting a game when another is in progress
+var isGameRunning = false;
+var appleCount = 1;
+var apples = [];
+var obstacles = [];
+var powers = [];
 
 // Snake and apple objects
-var snake, apple;
+var snake, apple, obstacles, powers;
 
 // Initialize the snake, apple, and game properties
-function initGame(boardSize) {
+function initGame(boardSize, appleCount) {
   canvas.width = boardSize * grid;
   canvas.height = boardSize * grid;
   
@@ -118,12 +143,18 @@ function initGame(boardSize) {
     maxCells: 4
   };
   
-  apple = {
-    x: getRandomInt(0, boardSize) * grid,
-    y: getRandomInt(0, boardSize) * grid,
-    color: getRandomAppleColor()
-  };
-  
+  apples = [];
+  for (let i = 0; i < appleCount; i++) {
+    apples.push({
+      x: getRandomInt(0, boardSize) * grid,
+      y: getRandomInt(0, boardSize) * grid,
+      color: getRandomAppleColor()
+    });
+  }
+
+  obstacles = [];
+  powers = [];
+
   snakeColor = getRandomSnakeColor();
   score = 0;
   updateScore();
@@ -135,11 +166,13 @@ function startGame() {
   
   var boardSize = parseInt(document.getElementById('boardSize').value);
   var speedInput = parseInt(document.getElementById('speed').value);
+  var multipleApplesToggle = document.getElementById('multipleApplesToggle').checked;
+  appleCount = multipleApplesToggle ? parseInt(document.getElementById('appleCount').value) : 1;
   
   snakeSpeed = 11 - speedInput; // Lower number = faster speed
   grid = 400 / boardSize; // Adjust grid size based on the board size
   
-  initGame(boardSize);
+  initGame(boardSize, appleCount);
   
   // Hide the menu and show the canvas
   document.getElementById('menu').style.display = 'none';
@@ -208,24 +241,28 @@ function loop() {
     snake.cells.pop();
   }
 
-  // Draw the apple
-  context.fillStyle = apple.color;
-  context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
+  // Draw multiple apples
+  apples.forEach(function(apple) {
+    context.fillStyle = apple.color;
+    context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
+  });
 
   // Draw the snake
   context.fillStyle = snakeColor;
   snake.cells.forEach(function(cell, index) {
     context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
 
-    // Check for snake eating the apple
-    if (cell.x === apple.x && cell.y === apple.y) {
-      snake.maxCells++;
-      score++; // Increase the score
-      updateScore(); // Update the score display
-      apple.x = getRandomInt(0, canvas.width / grid) * grid;
-      apple.y = getRandomInt(0, canvas.height / grid) * grid;
-      apple.color = getRandomAppleColor(); // Change apple color
-    }
+    // Check for snake eating any apple
+    apples.forEach(function(apple, appleIndex) {
+      if (cell.x === apple.x && cell.y === apple.y) {
+        snake.maxCells++;
+        score++; // Increase the score
+        updateScore(); // Update the score display
+        // Move the eaten apple to a new location
+        apple.x = getRandomInt(0, canvas.width / grid) * grid;
+        apple.y = getRandomInt(0, canvas.height / grid) * grid;
+      }
+    });
 
     // Check for collision with itself
     for (var i = index + 1; i < snake.cells.length; i++) {
@@ -242,10 +279,7 @@ function loop() {
 
 // End the game, show the menu, and display the final score
 function endGame() {
-  // Display final score on the menu
   finalScoreElement.innerHTML = 'Final Score: ' + score;
-  
-  // Hide the game canvas and show the menu
   canvas.style.display = 'none';
   document.getElementById('menu').style.display = 'flex';
   scoreElement.style.display = 'none';
@@ -266,6 +300,19 @@ document.addEventListener('keydown', function(e) {
     snake.dy = grid;
     snake.dx = 0;
   }
+});
+
+// Enable or disable input fields based on checkbox state
+document.getElementById('multipleApplesToggle').addEventListener('change', function() {
+  document.getElementById('appleCount').disabled = !this.checked;
+});
+
+document.getElementById('obstacleToggle').addEventListener('change', function() {
+  document.getElementById('obstacleInterval').disabled = !this.checked;
+});
+
+document.getElementById('powerToggle').addEventListener('change', function() {
+  document.getElementById('powerInterval').disabled = !this.checked;
 });
 </script>
 </body>
