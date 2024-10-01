@@ -1,0 +1,225 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Rain Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 800px;
+        }
+        .input-section {
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .input-section label {
+            font-weight: bold;
+        }
+        .input-pair {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .input-pair label {
+            margin-right: 10px;
+        }
+        input[type="text"], input[type="number"], input[type="color"], select {
+            padding: 5px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        input[type="checkbox"] {
+            margin-left: 10px;
+        }
+        #canvas-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            position: relative;
+            border: 2px dashed #aaa;
+            padding: 10px;
+        }
+        canvas {
+            border: 1px solid #000;
+            max-width: 100%;
+            height: auto;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Matrix Rain Generator</h1>
+
+        <!-- Input fields for text, color, size, etc. -->
+        <div class="input-section">
+            <div class="input-pair">
+                <label for="textInput">Matrix Symbols:</label>
+                <input type="text" id="textInput" placeholder="Enter symbols (e.g. 01)">
+            </div>
+            <div class="input-pair">
+                <label for="symbolColor">Symbol Color:</label>
+                <input type="color" id="symbolColor" value="#00ff00">
+            </div>
+            <div class="input-pair">
+                <label for="bgColor">Background Color:</label>
+                <input type="color" id="bgColor" value="#000000">
+            </div>
+            <div class="input-pair">
+                <label for="fontStyle">Font Style:</label>
+                <select id="fontStyle">
+                    <option value="monospace">Monospace</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Verdana">Verdana</option>
+                </select>
+            </div>
+            <div class="input-pair">
+                <label for="fontSize">Font Size:</label>
+                <input type="number" id="fontSize" value="16" min="10">
+            </div>
+            <div class="input-pair">
+                <label for="rainSpeed">Rain Speed:</label>
+                <input type="number" id="rainSpeed" value="50" min="10">
+            </div>
+        </div>
+
+        <!-- Canvas container -->
+        <div id="canvas-container">
+            <canvas id="matrixCanvas"></canvas>
+        </div>
+
+        <!-- Buttons for Download -->
+        <button onclick="downloadImage()">Download PNG Wallpaper</button>
+        <button onclick="downloadGif()">Download GIF</button>
+    </div>
+
+    <script>
+        let canvas = document.getElementById('matrixCanvas');
+        let ctx = canvas.getContext('2d');
+
+        // Set canvas dimensions
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let symbols = [];
+        let columns = Math.floor(canvas.width / 20);
+        let drops = [];
+
+        // Initialize drops
+        for (let x = 0; x < columns; x++) {
+            drops[x] = canvas.height;
+        }
+
+        // Generate random matrix symbols
+        function randomSymbol() {
+            const textInput = document.getElementById('textInput').value || '01';
+            return textInput.charAt(Math.floor(Math.random() * textInput.length));
+        }
+
+        // Main function for drawing the matrix rain
+        function drawMatrix() {
+            const bgColor = document.getElementById('bgColor').value;
+            const symbolColor = document.getElementById('symbolColor').value;
+            const fontStyle = document.getElementById('fontStyle').value;
+            const fontSize = document.getElementById('fontSize').value;
+            const rainSpeed = document.getElementById('rainSpeed').value;
+
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = symbolColor;
+            ctx.font = `${fontSize}px ${fontStyle}`;
+
+            for (let i = 0; i < drops.length; i++) {
+                let text = randomSymbol();
+                let x = i * 20;
+                let y = drops[i] * 20;
+
+                ctx.fillText(text, x, y);
+
+                // Reset the drop to the top of the screen
+                if (y > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                // Move the drop down
+                drops[i]++;
+            }
+        }
+
+        // Continuously update the canvas for animation
+        function updateMatrix() {
+            drawMatrix();
+            setTimeout(updateMatrix, 50);
+        }
+
+        updateMatrix();
+
+        // Adjust the canvas size when the window is resized
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            columns = Math.floor(canvas.width / 20);
+            drops = [];
+            for (let x = 0; x < columns; x++) {
+                drops[x] = canvas.height;
+            }
+        });
+
+        // Download the canvas as an image (PNG)
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'matrix_rain_wallpaper.png';
+            link.click();
+        }
+
+        // Download the animation as a GIF
+        function downloadGif() {
+            const gif = new GIF({
+                workers: 2,
+                quality: 10
+            });
+
+            // Capture frames for 3 seconds (adjust as needed)
+            for (let i = 0; i < 60; i++) {
+                drawMatrix(); // Manually draw the matrix in each frame
+                gif.addFrame(canvas, {copy: true, delay: 100});
+            }
+
+            gif.on('finished', function(blob) {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'matrix_rain_animation.gif';
+                link.click();
+            });
+
+            gif.render();
+        }
+    </script>
+</body>
+</html>
