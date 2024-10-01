@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
   <title>Advanced Customizable Snake Game</title>
@@ -94,13 +95,13 @@
     
     <!-- Multiple Apples -->
     <label>
-      <input type="checkbox" id="multipleApplesToggle"> Enable Multiple Apples
+      <input type="checkbox" id="multipleApplesToggle" onclick="document.getElementById('appleCount').disabled = !this.checked;"> Enable Multiple Apples
       <input type="number" id="appleCount" value="1" min="1" max="10" disabled>
     </label>
     
     <!-- Power-ups -->
     <label>
-      <input type="checkbox" id="powerToggle"> Enable Power-ups
+      <input type="checkbox" id="powerToggle" onclick="document.getElementById('powerInterval').disabled = !this.checked;"> Enable Power-ups
       <input type="number" id="powerInterval" value="15" min="1" max="100" disabled> (Spawn every X seconds)
     </label>
     
@@ -269,13 +270,13 @@
 
     // Get random color for the apple
     function getRandomAppleColor() {
-      const appleColors = ['red', 'orange'];
+      const appleColors = ['red', 'green', 'yellow'];
       return appleColors[Math.floor(Math.random() * appleColors.length)];
     }
 
-    // Get random color for the snake (teal or cyan)
+    // Get random snake color
     function getRandomSnakeColor() {
-      const snakeColors = ['teal', 'cyan'];
+      const snakeColors = ['#00FF00', '#FF00FF', '#FFFF00', '#00FFFF', '#FF0000'];
       return snakeColors[Math.floor(Math.random() * snakeColors.length)];
     }
 
@@ -337,7 +338,7 @@
       if (snake.y < 0) snake.y = canvas.height - grid;
       else if (snake.y >= canvas.height) snake.y = 0;
 
-      // Check collision with apple
+      // Check collision with apples
       apples.forEach((apple, index) => {
         if (snake.x === apple.x && snake.y === apple.y) {
           score += 10;
@@ -373,7 +374,7 @@
 
       // Draw snake
       context.fillStyle = snakeColor;
-      snake.cells.forEach((cell, index) => {
+      snake.cells.forEach((cell) => {
         context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
       });
 
@@ -387,6 +388,9 @@
       powers.forEach(power => {
         context.fillStyle = power.color;
         context.fillRect(power.x, power.y, grid - 1, grid - 1);
+        context.fillStyle = 'white'; // Draw type number
+        context.font = '12px Arial';
+        context.fillText(power.type, power.x + 4, power.y + 12); // Display power type
       });
     }
 
