@@ -196,30 +196,41 @@ function loop() {
     snake.cells.pop();
   }
 
+  // Draw the apple
   context.fillStyle = apple.color;
   context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
 
+  // Draw the snake head
+  context.fillStyle = 'yellow'; // Snake head in yellow
+  context.fillRect(snake.cells[0].x, snake.cells[0].y, grid - 1, grid - 1);
+
+  // Draw the rest of the snake
   context.fillStyle = snakeColor;
-  snake.cells.forEach(function(cell, index) {
-    context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
-
-    if (cell.x === apple.x && cell.y === apple.y) {
-      snake.maxCells++;
-      score++;
-      updateScore();
-      apple.x = getRandomInt(0, canvas.width / grid) * grid;
-      apple.y = getRandomInt(0, canvas.height / grid) * grid;
-      apple.color = getRandomAppleColor();
+  for (let i = 1; i < snake.cells.length; i++) {
+    if (i === snake.cells.length - 1) {
+      context.fillStyle = 'darkgreen'; // Snake tail in dark green
     }
+    context.fillRect(snake.cells[i].x, snake.cells[i].y, grid - 1, grid - 1);
+  }
 
-    for (var i = index + 1; i < snake.cells.length; i++) {
-      if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-        clearInterval(gameInterval);
-        endGame();
-        return;
-      }
+  // Snake eating the apple
+  if (snake.cells[0].x === apple.x && snake.cells[0].y === apple.y) {
+    snake.maxCells++;
+    score++;
+    updateScore();
+    apple.x = getRandomInt(0, canvas.width / grid) * grid;
+    apple.y = getRandomInt(0, canvas.height / grid) * grid;
+    apple.color = getRandomAppleColor();
+  }
+
+  // Snake collision with itself
+  for (let i = 1; i < snake.cells.length; i++) {
+    if (snake.cells[0].x === snake.cells[i].x && snake.cells[0].y === snake.cells[i].y) {
+      clearInterval(gameInterval);
+      endGame();
+      return;
     }
-  });
+  }
 }
 
 // End the game
@@ -230,24 +241,12 @@ function endGame() {
   scoreElement.style.display = 'none';
 }
 
-// Key and controller inputs
-document.addEventListener('keydown', function(e) {
-  if ((e.key === 'ArrowLeft' || e.key === 'a') && snake.dx === 0) {
-    snake.dx = -grid;
-    snake.dy = 0;
-  } else if ((e.key === 'ArrowUp' || e.key === 'w') && snake.dy === 0) {
-    snake.dy = -grid;
-    snake.dx = 0;
-  } else if ((e.key === 'ArrowRight' || e.key === 'd') && snake.dx === 0) {
-    snake.dx = grid;
-    snake.dy = 0;
-  } else if ((e.key === 'ArrowDown' || e.key === 's') && snake.dy === 0) {
-    snake.dy = grid;
-    snake.dx = 0;
-  }
-});
+// Prevent page reload on swipe
+document.addEventListener('touchstart', function(e) {
+  e.preventDefault();
+}, {passive: false});
 
-// Swipe control for mobile
+// Swipe controls
 let touchStartX = 0;
 let touchStartY = 0;
 
@@ -258,6 +257,7 @@ canvas.addEventListener('touchstart', function(e) {
 });
 
 canvas.addEventListener('touchmove', function(e) {
+  e.preventDefault(); // Prevent default scroll behavior
   if (!touchStartX || !touchStartY) return;
 
   let touchEndX = e.touches[0].clientX;
@@ -287,6 +287,28 @@ canvas.addEventListener('touchmove', function(e) {
   touchStartX = 0;
   touchStartY = 0;
 });
+
+// WASD and arrow key inputs
+document.addEventListener('keydown', function(e) {
+  if ((e.key === 'ArrowLeft' || e.key === 'a') && snake.dx === 0) {
+    snake.dx = -grid;
+    snake.dy = 0;
+  } else if ((e.key === 'ArrowUp' || e.key === 'w') && snake.dy === 0) {
+    snake.dy = -grid;
+    snake.dx = 0;
+  } else if ((e.key === 'ArrowRight' || e.key === 'd') && snake.dx === 0) {
+    snake.dx = grid;
+    snake.dy = 0;
+  } else if ((e.key === 'ArrowDown' || e.key === 's') && snake.dy === 0) {
+    snake.dy = grid;
+    snake.dx = 0;
+  }
+});
+
+// Prevent scrolling on swipe down/up
+window.addEventListener('touchmove', function(e) {
+  e.preventDefault();
+}, { passive: false });
 </script>
 </body>
 </html>
