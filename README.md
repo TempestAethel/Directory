@@ -1,1 +1,1 @@
-https://tempestaethel.github.io/ArbitraryHub/
+https://tempestaethel.github.io/LinkHub/
