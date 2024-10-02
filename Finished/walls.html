@@ -82,7 +82,6 @@
     <div class="container">
         <h1>Matrix Rain Generator</h1>
 
-        <!-- Input fields for text, color, size, etc. -->
         <div class="input-section">
             <div class="input-pair">
                 <label for="textInput">Matrix Symbols:</label>
@@ -114,9 +113,12 @@
                 <label for="rainSpeed">Rain Speed:</label>
                 <input type="number" id="rainSpeed" value="50" min="10">
             </div>
+            <div class="input-pair">
+                <label for="density">Drop Density:</label>
+                <input type="number" id="density" value="1" min="1" max="10" step="1">
+            </div>
         </div>
 
-        <!-- Buttons for Download -->
         <button onclick="downloadImage()">Download PNG Wallpaper</button>
     </div>
 
@@ -131,10 +133,15 @@
         let columns = Math.floor(canvas.width / 20);
         let drops = [];
 
-        // Initialize drops
-        for (let x = 0; x < columns; x++) {
-            drops[x] = canvas.height;
+        // Function to initialize drops based on density
+        function initializeDrops() {
+            const density = parseInt(document.getElementById('density').value) || 1;
+            columns = Math.floor(canvas.width / 20);
+            drops = new Array(columns * density).fill(canvas.height);
         }
+
+        // Initialize drops
+        initializeDrops();
 
         // Generate random matrix symbols
         function randomSymbol() {
@@ -155,9 +162,10 @@
             ctx.fillStyle = symbolColor;
             ctx.font = `${fontSize}px ${fontStyle}`;
 
+            const density = parseInt(document.getElementById('density').value) || 1;
             for (let i = 0; i < drops.length; i++) {
                 let text = randomSymbol();
-                let x = i * 20; // Keep space based on symbol width
+                let x = (i % columns) * 20; // Keep space based on symbol width
                 let y = drops[i] * fontSize; // Adjust y based on font size
 
                 ctx.fillText(text, x, y);
@@ -192,11 +200,13 @@
         window.addEventListener('resize', function() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            columns = Math.floor(canvas.width / 20);
-            drops = [];
-            for (let x = 0; x < columns; x++) {
-                drops[x] = canvas.height;
-            }
+            initializeDrops();
+        });
+
+        // Event listener for density change
+        document.getElementById('density').addEventListener('input', function() {
+            initializeDrops(); // Reinitialize drops based on new density
+            startMatrixRain();  // Restart the rain with the new density
         });
 
         // Event listener for rain speed change to adjust speed in real-time
