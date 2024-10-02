@@ -129,6 +129,7 @@
     let count = 0;
     let snakeSpeed = 5; // 1 (slowest) to 10 (fastest)
     let snakeColor = '';
+    let appleColor = '';
     let score = 0;
     let gameInterval;
     let powerIntervalId;
@@ -169,8 +170,9 @@
       // Initialize powers
       powers = [];
       
-      // Choose snake color once
+      // Choose snake and apple colors
       snakeColor = getRandomSnakeColor();
+      appleColor = getRandomAppleColor();
       
       // Reset score
       score = 0;
@@ -225,7 +227,7 @@
         newApple = {
           x: getRandomInt(0, canvas.width / grid) * grid,
           y: getRandomInt(0, canvas.height / grid) * grid,
-          color: getRandomAppleColor()
+          color: appleColor
         };
       } while (isOccupied(newApple.x, newApple.y));
       apples.push(newApple);
@@ -234,12 +236,13 @@
     // Spawn a power-up at a random location not occupied by snake or apples
     function spawnPower() {
       let newPower;
+      const powerNumber = getRandomInt(1, 4); // Generate a random number for differentiation
       do {
         newPower = {
           x: getRandomInt(0, canvas.width / grid) * grid,
           y: getRandomInt(0, canvas.height / grid) * grid,
-          color: 'magenta',
-          type: getRandomPowerType()
+          color: `magenta${powerNumber}`, // Use magenta with a number
+          type: powerNumber // Set the type to differentiate them
         };
       } while (isOccupied(newPower.x, newPower.y));
       powers.push(newPower);
@@ -267,16 +270,15 @@
       const types = [POWER_TYPES.SPEED_UP, POWER_TYPES.SPEED_DOWN, POWER_TYPES.SCORE_UP];
       return types[Math.floor(Math.random() * types.length)];
     }
-
-    // Get random color for the apple
+    // Get random color for the apple (red or orange)
     function getRandomAppleColor() {
-      const appleColors = ['red', 'green', 'yellow'];
+      const appleColors = ['red', 'orange'];
       return appleColors[Math.floor(Math.random() * appleColors.length)];
     }
 
-    // Get random snake color
+    // Get random snake color (teal or cyan)
     function getRandomSnakeColor() {
-      const snakeColors = ['#00FF00', '#FF00FF', '#FFFF00', '#00FFFF', '#FF0000'];
+      const snakeColors = ['teal', 'cyan'];
       return snakeColors[Math.floor(Math.random() * snakeColors.length)];
     }
 
@@ -386,7 +388,7 @@
 
       // Draw power-ups
       powers.forEach(power => {
-        context.fillStyle = power.color;
+        context.fillStyle = power.color; // magenta with number
         context.fillRect(power.x, power.y, grid - 1, grid - 1);
         context.fillStyle = 'white'; // Draw type number
         context.font = '12px Arial';
