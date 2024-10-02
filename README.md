@@ -1,1 +1,1 @@
-https://tempestaethel.github.io/LinkHub/
+https://tempestaethel.github.io/Directory/
