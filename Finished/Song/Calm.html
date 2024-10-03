@@ -26,149 +26,108 @@
             height: 100%;
             z-index: -1;
         }
-        .volume-slider {
+         .volume-slider {
             position: absolute;
             left: 20px;
-            bottom: 20px;
-            width: 200px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .volume-slider input {
+            writing-mode: bt-lr; /* Makes the slider vertical */
+            transform: rotate(180deg); /* Flips the slider */
         }
         .timer-input {
             position: absolute;
+            left: 100px;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateY(-50%);
             display: none;
-            text-align: center;
-            z-index: 10;
-        }
-        .countdown {
-            font-size: 24px;
-            margin-top: 10px;
         }
     </style>
 </head>
-<body>
-
-<audio id="audio" preload="auto"></audio>
-
 <div class="overlay"></div>
 
 <div class="volume-slider">
+    <button id="muteBtn">Mute</button>
     <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
 </div>
 
 <div class="timer-input" id="timerInput">
     <input type="number" id="timerValue" placeholder="Minutes" min="1">
     <button id="setTimerBtn">Set Timer</button>
-    <div class="countdown" id="countdownDisplay"></div>
 </div>
 
 <script>
-    const audioFiles = [
-        "Calm (1).mp3",
-        "Calm (2).mp3",
-        "Calm (3).mp3",
-        "Calm (4).mp3",
-        "Calm (5).mp3",
-        "Calm (6).mp3",
-        "Calm (7).mp3",
-        "Calm (8).mp3",
-        "Calm (9).mp3",
-        "Calm (10).mp3",
-        "Calm (11).mp3",
-        "Calm (12).mp3"
-    ];
-
     let currentTrack = 0;
     const audioElement = document.getElementById('audio');
     const volumeSlider = document.getElementById('volume');
+    const muteBtn = document.getElementById('muteBtn');
     const timerInput = document.getElementById('timerInput');
     const timerValueInput = document.getElementById('timerValue');
-    const countdownDisplay = document.getElementById('countdownDisplay');
     let isMuted = false;
     let muteTimeout;
-    let countdownInterval;
 
     function playTrack(trackIndex) {
         audioElement.src = audioFiles[trackIndex];
-        audioElement.play();
-    }
-
-    audioElement.addEventListener('ended', () => {
-        currentTrack = (currentTrack + 1) % audioFiles.length; // Move to the next track
         playTrack(currentTrack);
     });
 
+    document.addEventListener('click', (event) => {
+        const halfWidth = window.innerWidth / 2;
+        if (event.clientX < halfWidth) {
+            // Clicked on the left side - Previous track
+            currentTrack = (currentTrack - 1 + audioFiles.length) % audioFiles.length; // Loop back to last
+        } else {
+            // Clicked on the right side - Next track
+            currentTrack = (currentTrack + 1) % audioFiles.length; // Loop back to first
+        }
+        playTrack(currentTrack);
+    });
     volumeSlider.addEventListener('input', () => {
         audioElement.volume = volumeSlider.value;
         if (audioElement.volume === 0) {
             isMuted = true;
+            muteBtn.innerText = 'Unmute';
         } else {
             isMuted = false;
+            muteBtn.innerText = 'Mute';
+        }
+    });
+    muteBtn.addEventListener('click', () => {
+        if (isMuted) {
+            audioElement.volume = volumeSlider.value;
+            isMuted = false;
+            muteBtn.innerText = 'Mute';
+        } else {
+            audioElement.volume = 0;
+            isMuted = true;
+            muteBtn.innerText = 'Unmute';
         }
     });
 
     document.addEventListener('keydown', (event) => {
-        if (event.key === ' ') {
-            // Toggle play/pause with SPACE
-            if (audioElement.paused) {
-                audioElement.play();
-            } else {
-                audioElement.pause();
-            }
-            event.preventDefault(); // Prevent scrolling
-        } else if (event.key === 'M' || event.key === 'm') {
-            // Mute/unmute with M key
-            if (isMuted) {
-                audioElement.volume = volumeSlider.value;
-                isMuted = false;
-            } else {
-                audioElement.volume = 0;
-                isMuted = true;
-            }
-        } else if (event.key === 'T' || event.key === 't') {
-            // Toggle timer input box and countdown
+        if (event.key === 'T') {
             timerInput.style.display = timerInput.style.display === 'block' ? 'none' : 'block';
-            countdownDisplay.innerText = ''; // Clear countdown display
-            if (timerInput.style.display === 'block') {
-                countdownDisplay.style.display = 'block'; // Show countdown display
-            } else {
-                clearInterval(countdownInterval);
-                countdownDisplay.style.display = 'none'; // Hide countdown display
-            }
-        } else if (event.key === 'Shift') {
-            // Toggle layout display
-            timerInput.style.display = 'block';
-            setTimeout(() => {
-                timerInput.style.display = 'none';
-            }, 2000); // Show for 2 seconds
+            timerValueInput.value = '';
         }
     });
 
-    document.getElementById('setTimerBtn').addEventListener('click', () => {
-        const minutes = parseInt(timerValueInput.value);
         if (isNaN(minutes) || minutes < 1) return;
         audioElement.volume = 0; // Mute
         isMuted = true;
+        muteBtn.innerText = 'Unmute';
 
-        // Start countdown
-        let timeRemaining = minutes * 60; // Convert to seconds
-        countdownDisplay.innerText = `Muted for ${minutes} minutes`;
-        
-        clearInterval(countdownInterval);
-        countdownInterval = setInterval(() => {
-            timeRemaining--;
-            countdownDisplay.innerText = `Muted for ${Math.ceil(timeRemaining / 60)} minutes`;
-            if (timeRemaining <= 0) {
-                audioElement.volume = volumeSlider.value;
-                isMuted = false;
-                clearInterval(countdownInterval);
-                countdownDisplay.innerText = ''; // Clear countdown display
-            }
-        }, 1000); // Update every second
+        clearTimeout(muteTimeout);
+        muteTimeout = setTimeout(() => {
+            audioElement.volume = volumeSlider.value;
+            isMuted = false;
+            muteBtn.innerText = 'Mute';
+            timerInput.style.display = 'none'; // Hide input after timeout
+        }, minutes * 60 * 1000); // Convert minutes to milliseconds
     });
-
-    // Start playing the first track on load
     playTrack(currentTrack);
 
     // Gradient animation
