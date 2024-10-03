@@ -3,185 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calming Music Player</title>
+    <title>Soothing Audio Player</title>
     <style>
         body {
             margin: 0;
             height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            overflow: hidden;
-            color: white;
-            transition: color 0.5s;
-            background: linear-gradient(135deg, cyan, teal);
-            animation: backgroundAnimation 10s infinite alternate;
-        }
-        @keyframes backgroundAnimation {
-            0% { background: linear-gradient(135deg, cyan, teal); }
-            50% { background: linear-gradient(135deg, #b0e0e6, #f0f8ff); }
-            100% { background: linear-gradient(135deg, teal, cyan); }
-        }
-        .dark {
-            background: linear-gradient(135deg, cyan, teal);
-        }
-        .light {
-            background: linear-gradient(135deg, #f0f8ff, #b0e0e6);
-            color: black;
-        }
-        .toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        audio {
-            display: none;
-        }
-        .controls {
-            position: absolute;
-            bottom: 60px;
-            display: flex;
-            width: 100%;
             justify-content: center;
+            background: linear-gradient(135deg, #3f4c6b, #606c88);
+            color: white;
+            font-family: Arial, sans-serif;
+            transition: background 1s ease;
+            overflow: hidden;
         }
-        .track-info {
-            position: absolute;
-            top: 20px;
-            text-align: center;
-            width: 100%;
-        }
-        .progress {
-            position: absolute;
-            bottom: 40px;
-            width: 90%;
-            margin: 0 auto;
-        }
-        input[type="range"] {
-            width: 100%;
-        }
-        canvas {
+        .overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Prevent canvas from blocking clicks */
+            z-index: -1;
         }
     </style>
 </head>
-<body class="dark">
-    <button class="toggle">Toggle Theme</button>
-    <audio id="audio" autoplay loop></audio>
-    <div class="track-info">
-        <h2 id="track-title">Track Title</h2>
-        <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.5">
-    </div>
-    <div class="progress">
-        <input type="range" id="progress-bar" min="0" max="100" value="0">
-    </div>
-    <div class="controls"></div>
-    <canvas id="visualizer"></canvas>
+<body>
 
-    <script>
-        const audio = document.getElementById('audio');
-        const toggle = document.querySelector('.toggle');
-        const trackTitle = document.getElementById('track-title');
-        const volumeSlider = document.getElementById('volume-slider');
-        const progressBar = document.getElementById('progress-bar');
-        const canvas = document.getElementById('visualizer');
-        const ctx = canvas.getContext('2d');
+<audio id="audio" preload="auto"></audio>
 
-        let currentTrack = 0;
-        const tracks = Array.from({ length: 12 }, (_, i) => `Calm (${i + 1}).mp3`);
-        let audioContext;
-        let analyser;
+<div class="overlay"></div>
 
-        function setupAudioVisualizer() {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            const source = audioContext.createMediaElementSource(audio);
-            source.connect(analyser);
-            analyser.connect(audioContext.destination);
-            analyser.fftSize = 256;
+<script>
+    const audioFiles = [
+        "Calm (1).mp3",
+        "Calm (2).mp3",
+        "Calm (3).mp3",
+        "Calm (4).mp3",
+        "Calm (5).mp3",
+        "Calm (6).mp3",
+        "Calm (7).mp3",
+        "Calm (8).mp3",
+        "Calm (9).mp3",
+        "Calm (10).mp3",
+        "Calm (11).mp3",
+        "Calm (12).mp3"
+    ];
+
+    let currentTrack = 0;
+    const audioElement = document.getElementById('audio');
+
+    function playTrack(trackIndex) {
+        audioElement.src = audioFiles[trackIndex];
+        audioElement.play();
+    }
+
+    audioElement.addEventListener('ended', () => {
+        currentTrack = (currentTrack + 1) % audioFiles.length; // Move to the next track
+        playTrack(currentTrack);
+    });
+
+    document.addEventListener('click', (event) => {
+        const halfWidth = window.innerWidth / 2;
+        if (event.clientX < halfWidth) {
+            // Clicked on the left side - Previous track
+            currentTrack = (currentTrack - 1 + audioFiles.length) % audioFiles.length; // Loop back to last
+        } else {
+            // Clicked on the right side - Next track
+            currentTrack = (currentTrack + 1) % audioFiles.length; // Loop back to first
         }
+        playTrack(currentTrack);
+    });
 
-        function loadTrack(trackIndex) {
-            audio.src = tracks[trackIndex];
-            trackTitle.textContent = tracks[trackIndex].replace('.mp3', '');
-            audio.play();
-            updateProgress();
-            setupAudioVisualizer();
-            audio.addEventListener('timeupdate', updateProgress);
-            audio.addEventListener('ended', nextTrack);
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark');
-            document.body.classList.toggle('light');
-        }
-
-        function nextTrack() {
-            currentTrack = (currentTrack + 1) % tracks.length;
-            loadTrack(currentTrack);
-        }
-
-        function prevTrack() {
-            currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
-            loadTrack(currentTrack);
-        }
-
-        function updateProgress() {
-            const progress = (audio.currentTime / audio.duration) * 100;
-            progressBar.value = progress;
-        }
-
-        volumeSlider.addEventListener('input', (e) => {
-            audio.volume = e.target.value;
-        });
-
-        progressBar.addEventListener('input', (e) => {
-            const seekTime = (audio.duration * e.target.value) / 100;
-            audio.currentTime = seekTime;
-        });
-
-        document.body.addEventListener('click', (event) => {
-            const screenWidth = window.innerWidth;
-            if (event.clientX < screenWidth / 2) {
-                prevTrack();
-            } else {
-                nextTrack();
-            }
-        });
-
-        toggle.addEventListener('click', toggleTheme);
-
-        function drawVisualizer() {
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            analyser.getByteFrequencyData(dataArray);
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            const barWidth = (canvas.width / bufferLength) * 2.5;
-            let barHeight;
-            let x = 0;
-            for (let i = 0; i < bufferLength; i++) {
-                barHeight = dataArray[i] / 2;
-                ctx.fillStyle = 'rgb(' + (barHeight + 100) + ',50,50)';
-                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                x += barWidth + 1;
-            }
-            requestAnimationFrame(drawVisualizer);
-        }
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        loadTrack(currentTrack); // Load the first track on startup
-        drawVisualizer();
-    </script>
+    // Start playing the first track on load
+    playTrack(currentTrack);
+</script>
 </body>
 </html>
