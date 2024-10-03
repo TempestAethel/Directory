@@ -16,6 +16,7 @@
             font-family: Arial, sans-serif;
             transition: background 1s ease;
             overflow: hidden;
+            position: relative;
         }
         .overlay {
             position: absolute;
@@ -25,6 +26,26 @@
             height: 100%;
             z-index: -1;
         }
+        .volume-slider {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .volume-slider input {
+            writing-mode: bt-lr; /* Makes the slider vertical */
+            transform: rotate(180deg); /* Flips the slider */
+        }
+        .timer-input {
+            position: absolute;
+            left: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -32,6 +53,16 @@
 <audio id="audio" preload="auto"></audio>
 
 <div class="overlay"></div>
+
+<div class="volume-slider">
+    <button id="muteBtn">Mute</button>
+    <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+</div>
+
+<div class="timer-input" id="timerInput">
+    <input type="number" id="timerValue" placeholder="Minutes" min="1">
+    <button id="setTimerBtn">Set Timer</button>
+</div>
 
 <script>
     const audioFiles = [
@@ -51,6 +82,12 @@
 
     let currentTrack = 0;
     const audioElement = document.getElementById('audio');
+    const volumeSlider = document.getElementById('volume');
+    const muteBtn = document.getElementById('muteBtn');
+    const timerInput = document.getElementById('timerInput');
+    const timerValueInput = document.getElementById('timerValue');
+    let isMuted = false;
+    let muteTimeout;
 
     function playTrack(trackIndex) {
         audioElement.src = audioFiles[trackIndex];
@@ -74,8 +111,67 @@
         playTrack(currentTrack);
     });
 
+    volumeSlider.addEventListener('input', () => {
+        audioElement.volume = volumeSlider.value;
+        if (audioElement.volume === 0) {
+            isMuted = true;
+            muteBtn.innerText = 'Unmute';
+        } else {
+            isMuted = false;
+            muteBtn.innerText = 'Mute';
+        }
+    });
+
+    muteBtn.addEventListener('click', () => {
+        if (isMuted) {
+            audioElement.volume = volumeSlider.value;
+            isMuted = false;
+            muteBtn.innerText = 'Mute';
+        } else {
+            audioElement.volume = 0;
+            isMuted = true;
+            muteBtn.innerText = 'Unmute';
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'T') {
+            timerInput.style.display = timerInput.style.display === 'block' ? 'none' : 'block';
+            timerValueInput.value = '';
+        }
+    });
+
+    document.getElementById('setTimerBtn').addEventListener('click', () => {
+        const minutes = parseInt(timerValueInput.value);
+        if (isNaN(minutes) || minutes < 1) return;
+        audioElement.volume = 0; // Mute
+        isMuted = true;
+        muteBtn.innerText = 'Unmute';
+        
+        clearTimeout(muteTimeout);
+        muteTimeout = setTimeout(() => {
+            audioElement.volume = volumeSlider.value;
+            isMuted = false;
+            muteBtn.innerText = 'Mute';
+            timerInput.style.display = 'none'; // Hide input after timeout
+        }, minutes * 60 * 1000); // Convert minutes to milliseconds
+    });
+
     // Start playing the first track on load
     playTrack(currentTrack);
+
+    // Gradient animation
+    function animateGradient() {
+        const colors = [
+            '#3f4c6b', '#606c88', '#f8cdda', '#1d2b64', 
+            '#f8cdda', '#fc4a1a', '#f7b733'
+        ];
+        const randomColor1 = colors[Math.floor(Math.random() * colors.length)];
+        const randomColor2 = colors[Math.floor(Math.random() * colors.length)];
+        document.body.style.background = `linear-gradient(135deg, ${randomColor1}, ${randomColor2})`;
+    }
+    
+    setInterval(animateGradient, 5000); // Change gradient every 5 seconds
 </script>
 </body>
 </html>
