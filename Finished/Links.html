@@ -3,22 +3,46 @@
   <title>Useful Links Collection</title>
   <link href="https://fonts.googleapis.com/css2?family=Norican&display=swap" rel="stylesheet">
   <style>
+    body {
+      font-family: 'Norican', sans-serif;
+      background-color: #121212; /* Dark background */
+      color: #ffffff; /* Light text color */
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
     .link-box {
-      border: 1px solid #ccc;
+      border: 1px solid #444; /* Darker border */
       padding: 15px;
       margin-bottom: 15px;
-      background-color: #f0f0f0;
+      background-color: #1e1e1e; /* Slightly lighter dark background */
+      border-radius: 5px; /* Rounded corners */
     }
     .link-box a {
-      font-family: 'Norican', sans-serif;
       text-decoration: none;
-      color: #000;
+      color: #bb86fc; /* Light purple for links */
+      transition: color 0.3s; /* Smooth transition for hover effect */
+    }
+    .link-box a:hover {
+      color: #3700b3; /* Darker purple on hover */
     }
     .section-title {
-      font-family: 'Norican', sans-serif;
       font-size: 24px;
       margin-top: 20px;
       margin-bottom: 10px;
+      color: #bb86fc; /* Light purple for section titles */
+    }
+    @media (max-width: 600px) {
+      .link-box {
+        padding: 10px; /* Adjust padding for smaller screens */
+      }
+      .section-title {
+        font-size: 20px; /* Adjust title size for smaller screens */
+      }
+      .link-box a {
+        display: block; /* Stack links vertically on small screens */
+        margin: 5px 0; /* Space between links */
+      }
     }
   </style>
 </head>
@@ -86,7 +110,7 @@
     <a href="https://aicurriculum.com/" style="margin-left: 20px;">AI Curriculum</a>
   </div>
 
-  <div class="section-title">Streaming Services alters</div>
+  <div class="section-title">Streaming Services</div>
   <div class="link-box">
     <a href="https://www.netflix.com/">Netflix</a>
     <a href="https://www.primevideo.com/" style="margin-left: 20px;">Prime Video</a>
