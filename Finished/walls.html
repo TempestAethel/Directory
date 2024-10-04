@@ -5,7 +5,7 @@
     <title>Matrix Rain Generator</title>
     <style>
         body {
-            font-family: 'Courier New', Courier, monospace; /* Use a monospaced font for a techy feel */
+            font-family: 'Courier New', Courier, monospace; /* Monospaced font for a techy feel */
             text-align: center;
             margin: 0;
             padding: 0;
@@ -19,14 +19,15 @@
             margin: 20px auto;
             width: 90%;
             max-width: 800px;
-            background-color: rgba(0, 0, 0, 0.8); /* Dark background for container */
+            background: rgba(0, 0, 0, 0.9); /* Dark background for container */
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 30px rgba(0, 255, 0, 0.5); /* Green glow effect */
         }
         h1 {
             color: #00ff00; /* Title color */
             margin-bottom: 20px;
+            text-shadow: 0 0 5px #00ff00; /* Glowing effect */
         }
         .input-section {
             margin: 10px 0;
@@ -53,9 +54,6 @@
             background-color: rgba(0, 0, 0, 0.6); /* Dark input background */
             color: #00ff00; /* Input text color */
         }
-        input[type="checkbox"] {
-            margin-left: 10px;
-        }
         button {
             padding: 10px 20px;
             background-color: #00cc00; /* Brighter green button */
@@ -64,11 +62,12 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
             margin-top: 10px;
         }
         button:hover {
             background-color: #009900; /* Darker green on hover */
+            transform: scale(1.05); /* Slight scaling effect */
         }
         canvas {
             position: fixed;
@@ -143,7 +142,7 @@
         function initializeDrops() {
             const density = parseInt(document.getElementById('density').value) || 1;
             columns = Math.floor(canvas.width / 20);
-            drops = new Array(columns * density).fill(canvas.height);
+            drops = new Array(columns * density).fill(0); // Initialize to 0 for better performance
         }
 
         // Initialize drops
@@ -186,17 +185,21 @@
             }
         }
 
-        let intervalId;
+        let lastTimestamp = 0;
+        let rainSpeed = 50;
 
         // Function to continuously update the matrix with adjustable speed
-        function startMatrixRain() {
-            const rainSpeed = document.getElementById('rainSpeed').value; // Get rain speed value
-
-            // Clear any existing interval before setting a new one
-            clearInterval(intervalId);
-
-            // Set a new interval with the user-defined speed
-            intervalId = setInterval(drawMatrix, rainSpeed);
+        function startMatrixRain(timestamp) {
+            if (lastTimestamp) {
+                const delta = timestamp - lastTimestamp;
+                if (delta >= rainSpeed) {
+                    drawMatrix();
+                    lastTimestamp = timestamp;
+                }
+            } else {
+                lastTimestamp = timestamp;
+            }
+            requestAnimationFrame(startMatrixRain);
         }
 
         // Start the matrix rain initially
@@ -212,12 +215,11 @@
         // Event listener for density change
         document.getElementById('density').addEventListener('input', function() {
             initializeDrops(); // Reinitialize drops based on new density
-            startMatrixRain();  // Restart the rain with the new density
         });
 
         // Event listener for rain speed change to adjust speed in real-time
         document.getElementById('rainSpeed').addEventListener('input', function() {
-            startMatrixRain();  // Restart the rain with the new speed
+            rainSpeed = this.value;  // Update rain speed based on user input
         });
 
         // Function to download the canvas as a PNG
