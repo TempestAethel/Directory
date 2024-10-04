@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,11 +5,13 @@
     <title>Matrix Rain Generator</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Courier New', Courier, monospace; /* Use a monospaced font for a techy feel */
             text-align: center;
             margin: 0;
             padding: 0;
             overflow: hidden; /* Hide scrollbars */
+            background-color: #000; /* Black background for contrast */
+            color: #00ff00; /* Default text color for matrix effect */
         }
         .container {
             position: relative;
@@ -18,9 +19,14 @@
             margin: 20px auto;
             width: 90%;
             max-width: 800px;
-            background-color: rgba(255, 255, 255, 0.8); /* Slightly transparent to see the background */
+            background-color: rgba(0, 0, 0, 0.8); /* Dark background for container */
             padding: 20px;
             border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: #00ff00; /* Title color */
+            margin-bottom: 20px;
         }
         .input-section {
             margin: 10px 0;
@@ -28,41 +34,41 @@
             flex-wrap: wrap;
             justify-content: space-between;
         }
-        .input-section label {
-            font-weight: bold;
-        }
         .input-pair {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
+            flex: 1; /* Allow flex-grow */
+            max-width: 300px; /* Limit input pair width */
         }
         .input-pair label {
             margin-right: 10px;
+            color: #fff; /* Label color */
         }
         input[type="text"], input[type="number"], input[type="color"], select {
-            padding: 5px;
+            padding: 8px;
             margin-right: 10px;
             border-radius: 5px;
-            border: 1px solid #ccc;
+            border: 1px solid #00ff00; /* Matrix green borders */
+            background-color: rgba(0, 0, 0, 0.6); /* Dark input background */
+            color: #00ff00; /* Input text color */
         }
         input[type="checkbox"] {
             margin-left: 10px;
         }
-        #canvas-container {
-            display: none; /* Hidden as it's not needed in the foreground */
-        }
         button {
             padding: 10px 20px;
-            background-color: #28a745;
+            background-color: #00cc00; /* Brighter green button */
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            transition: background-color 0.3s;
             margin-top: 10px;
         }
         button:hover {
-            background-color: #218838;
+            background-color: #009900; /* Darker green on hover */
         }
         canvas {
             position: fixed;
