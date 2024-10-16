@@ -1,7 +1,7 @@
 # Welcome to My Minesweeper Game! 🎉💣
 
 ## Overview
-Dive into my unique Minesweeper experience, where strategy and wits are key to navigating a field of hidden mines! 🌟✨ 
+Dive into my Minesweeper experience to navigating a field of hidden mines! 🌟✨ 
 
 ## Features
 
