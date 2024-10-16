@@ -127,7 +127,7 @@
 </head>
 <body>
 
-    <button class="back-button" onclick="https://tempestaethel.github.io/Minesweeper/">←</button>
+    <button class="back-button" onclick="window.location.href='https://tempestaethel.github.io/Minesweeper/'">←</button>
     <h1>Beginner's Bliss</h1>
     <div id="gameInfo">Size: 8x8 | Mines: 10 | Mine Percentage: 15.625%</div>
     <div id="minesLeft">Mines Left: <span id="minesCount">10</span></div>
@@ -287,6 +287,9 @@
                 showToast('Game Over! You hit a mine!'); // Show toast on hitting a mine
                 revealAllMines(); // Reveal all mines
                 renderBoard(); // Re-render the board
+                setTimeout(() => {
+                    resetGame(); // Reset the game after a short delay
+                }, 500); // Delay in milliseconds (500 ms = 0.5 seconds)
                 return;
             }
 
