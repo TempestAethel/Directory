@@ -251,7 +251,7 @@
             });
         }
 
-        function handleCellClick(x, y) {
+                function handleCellClick(x, y) {
             // Handles the click event on a cell
             if (firstClick) {
                 placeMines(x, y); // Place mines on first click
@@ -287,6 +287,9 @@
                 showToast('Game Over! You hit a mine!'); // Show toast on hitting a mine
                 revealAllMines(); // Reveal all mines
                 renderBoard(); // Re-render the board
+                setTimeout(() => {
+                    resetGame(); // Reset the game after a short delay
+                }, 500); // Delay in milliseconds (500 ms = 0.5 seconds)
                 return;
             }
 
