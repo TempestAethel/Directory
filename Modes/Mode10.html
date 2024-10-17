@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Titan's Trial</title>
+    <title>Beginner's Bliss</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,19 +27,19 @@
         }
         .board {
             display: grid;
-            grid-template-columns: repeat(50, 20px); /* Updated to 50 columns */
-            grid-template-rows: repeat(50, 20px); /* Updated to 50 rows */
+            grid-template-columns: repeat(8, 40px);
+            grid-template-rows: repeat(8, 40px);
             gap: 2px;
         }
         .cell {
-            width: 20px; /* Updated cell size */
-            height: 20px; /* Updated cell size */
+            width: 40px;
+            height: 40px;
             background-color: #2e2e2e;
             border: 1px solid #444;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 12px; /* Adjusted font size */
+            font-size: 20px;
             color: #ffffff;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
@@ -128,9 +128,9 @@
 <body>
 
     <button class="back-button" onclick="window.location.href='https://tempestaethel.github.io/Minesweeper/'">←</button>
-    <h1>Titan's Trial</h1>
-    <div id="gameInfo">Size: 50x50 | Mines: 400 | Mine Percentage: 16%</div>
-    <div id="minesLeft">Mines Left: <span id="minesCount">400</span></div>
+    <h1>Beginner's Bliss</h1>
+    <div id="gameInfo">Size: 8x8 | Mines: 10 | Mine Percentage: 15.625%</div>
+    <div id="minesLeft">Mines Left: <span id="minesCount">10</span></div>
     <div class="board-container">
         <div class="board" id="board"></div>
     </div>
@@ -138,8 +138,8 @@
     <div id="toast" class="toast">Congratulations! You win!</div>
 
     <script>
-        const boardSize = 50; // Updated board size to 50
-        const numberOfMines = 400; // Updated number of mines
+        const boardSize = 8; // Updated board size to 8
+        const numberOfMines = 10; // Total number of mines
         let board = [];
         let revealedCount = 0;
         let minesLeft = numberOfMines;
@@ -251,63 +251,55 @@
             });
         }
 
-function handleCellClick(x, y) {
-    // Handles the click event on a cell
-    if (firstClick) {
-        placeMines(x, y); // Place mines on first click
-        calculateValues(); // Calculate values after mines are placed
-        firstClick = false; // Set first click flag to false
-    }
-
-    const cell = board[x][y];
-    if (cell.marked) {
-        // Unmark cell on left-click
-        cell.marked = false; // Toggle marked state
-        minesLeft++; // Increment mines left
-        document.getElementById('minesCount').innerText = minesLeft; // Update mines display
-        renderBoard(); // Re-render the board
-        return;
-    }
-
-    if (cell.revealed) {
-        // Check if the clicked cell is a number
-        if (cell.value > 0) {
-            const markedCount = countMarkedNeighbors(x, y);
-            // Check if clicking on a number cell reveals a mine
-            if (markedCount !== cell.value) {
-                // There are not enough flags, so we check for mines in adjacent cells
-                if (areAdjacentCellsMined(x, y)) {
-                    showToast('Game Over! You hit a mine!'); // Show toast on hitting a mine
-                    revealAllMines(); // Reveal all mines
-                    renderBoard(); // Re-render the board
-                    return;
-                } else {
-                    revealSurroundingCells(x, y); // Reveal surrounding cells if marked count matches value
-                }
-            } else {
-                revealSurroundingCells(x, y); // Reveal surrounding cells if marked count matches value
+        function handleCellClick(x, y) {
+            // Handles the click event on a cell
+            if (firstClick) {
+                placeMines(x, y); // Place mines on first click
+                calculateValues(); // Calculate values after mines are placed
+                firstClick = false; // Set first click flag to false
             }
-            return;
+
+            const cell = board[x][y];
+            if (cell.marked) {
+                // Unmark cell on left-click
+                cell.marked = false; // Toggle marked state
+                minesLeft++; // Increment mines left
+                document.getElementById('minesCount').innerText = minesLeft; // Update mines display
+                renderBoard(); // Re-render the board
+                return;
+            }
+
+            if (cell.revealed) {
+                // Check if the clicked cell is a number
+                if (cell.value > 0) {
+                    const markedCount = countMarkedNeighbors(x, y);
+                    if (markedCount === cell.value) {
+                        revealSurroundingCells(x, y); // Reveal surrounding cells if marked count matches value
+                    }
+                }
+                return;
+            }
+
+            cell.revealed = true; // Reveal the clicked cell
+            revealedCount++; // Increment revealed count
+
+            if (cell.mine) {
+                showToast('Game Over! You hit a mine!'); // Show toast on hitting a mine
+                revealAllMines(); // Reveal all mines
+                renderBoard(); // Re-render the board
+                setTimeout(() => {
+                    resetGame(); // Reset the game after a short delay
+                }, 500); // Delay in milliseconds (500 ms = 0.5 seconds)
+                return;
+            }
+
+            if (cell.value === 0) {
+                revealAdjacentCells(x, y); // Reveal adjacent cells if value is zero
+            }
+
+            renderBoard(); // Re-render the board after clicking
+            checkWinCondition(); // Check if the player has won
         }
-    }
-
-    cell.revealed = true; // Reveal the clicked cell
-    revealedCount++; // Increment revealed count
-
-    if (cell.mine) {
-        showToast('Game Over! You hit a mine!'); // Show toast on hitting a mine
-        revealAllMines(); // Reveal all mines
-        renderBoard(); // Re-render the board
-        return;
-    }
-
-    if (cell.value === 0) {
-        revealAdjacentCells(x, y); // Reveal adjacent cells if value is zero
-    }
-
-    renderBoard(); // Re-render the board after clicking
-    checkWinCondition(); // Check if the player has won
-}
 
         function countMarkedNeighbors(x, y) {
             // Counts the number of marked neighbors around a cell
